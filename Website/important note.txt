@@ -1,0 +1,1 @@
+remove git ignore: git add -f (ur folder)
