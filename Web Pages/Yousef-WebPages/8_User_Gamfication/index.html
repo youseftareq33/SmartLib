@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+        <link rel="stylesheet" href="style.css">
+        <link rel="icon" type="image/png" href="image/logo.png">
+        <title>Rank Page</title>
+    </head>
+
+    <body>
+
+        <!-- Header -->
+        <header>
+            <div class="left-header-container" id="left-header-container">
+
+                <a class="logo" id="logo" href='#'><img src='image/logo.png' width='60' height='60'></a>
+
+                <a class="Categories" id="Categories" href='#'>Categories</a>
+                <ul class="dropdown-categories" id="dropdown-categories">
+                    <li onclick="handleOptionClick('Sport')">Sport</li>
+                    <li onclick="handleOptionClick('History')">History</li>
+                    <li onclick="handleOptionClick('Science')">Science</li>
+                    <li onclick="handleOptionClick('Algo')">Algo</li>
+                    <li onclick="handleOptionClick('Algo1')">Algo1</li>
+                    <li onclick="handleOptionClick('Algo2')">Algo2</li>
+                </ul>
+
+                <div class="search">
+                    <i class="fa fa-search search-icon"></i>
+                    <input class="search-input" id="search-input" type="search" placeholder="Search for anything">
+                </div>
+
+            </div>
+
+            <div class="right-header-container" id="right-header-container">
+                
+                <a class="help" id="help" href='#'><img src='image/help.png' width='60' height='60'></a>
+                <a class="fav_list" id="fav_list" href='#'><img id="img_fav_list" src='image/fav_list.png' width='24' height='25'></a>
+                <div class="fav_list_dropdown" id="fav_list_dropdown">
+                    <h2>WishList</h2>
+                    <br>
+                    <p>Your wishlist is empty.</p>
+                </div>
+
+                <a class="notification" id="notification" href='#'><img id="img_notification" src='image/empty_notification.png' width='24' height='25'></a>
+                <div class="notification_dropdown" id="notification_dropdown">
+                    <h2>Notification</h2>
+                    <br>
+                    <p>No new notifications.</p>
+                </div>
+
+                <a class="user" id="user" href='#'><img id="img_user" src='image/user.png' width='27' height='25'></a>
+                <ul class="dropdown-user" id="dropdown-user">
+                    <li onclick="handleOptionClick_user('User Profile')">User Profile</li>
+                    <li onclick="handleOptionClick_user('My Uploaded Book')">My Uploaded Book</li>
+                    <li onclick="handleOptionClick_user('Wish List')">Wish List</li>
+                    <li onclick="handleOptionClick_user('Notification')">Notification</li>
+                    <li onclick="handleOptionClick_user('Send FeedBack')">Send FeedBack</li>
+                    <li onclick="handleOptionClick_user('Log out')">Log out</li>
+                </ul>
+
+                <div class="feedback-stack" id="feedback-stack">
+                    <div class="feedback-content">
+                        <span class="close-btn" id="closeBtn">&times;</span>
+                        <h2>Send Feedback</h2>
+                        <textarea id="feedbackText" placeholder="Write your feedback here..."></textarea>
+                        <button id="sendFeedback">Send</button>
+                    </div>
+                </div>
+
+            </div>
+
+        </header>
+
+        <main>
+            <!-- Top -->
+            <div class="top_main_container">
+                <div class="points">
+                    <p>Your Points: </p>
+                    <img src='image/point.png' width='24' height='25'>
+                    <p class="num_points" id="num_points">100</p>
+                </div>
+                
+                <div class="progress-section">
+                    <div class="progress-bar">
+                        <div class="triangle-cursor"></div>
+                        <div class="progress-fill"></div>
+                        <div class="line1"></div>
+                        <div class="line2"></div>
+                    </div>
+            
+                    <div class="progress-labels">
+                        <span>
+                            <div class="rank-point">
+                                <p>0</p>
+                            </div>
+                        </span>
+
+                        <span>
+                            <div class="rank-point">
+                                <p>500</p>
+                                <img src="image/bronze_rank.png" width="60" height="60" onmouseover="showDetails(this)" onmouseout="hideDetails(this)">
+                                <p>Bronze</p>
+                                <div class="rank-point-details-bronze">
+                                    <div class="rank-point-details-bronze-top">
+                                        <img src="image/bronze_rank.png" width="45" height="45">
+                                        <h4>Bronze</h4>
+                                    </div>
+                                    <hr>
+                                    <p>Open translate feature, which let you convert text from english language to arabic language.</p>
+                                </div>
+                            </div>
+                            
+                        </span>
+
+                        <span>
+                            <div class="rank-point">
+                                <p>1500</p>
+                                <img src='image/silver_rank.png' width='60' height='60'>
+                                <p>Silver</p>
+                                <div class="rank-point-details-silver">
+                                    <div class="rank-point-details-silver-top">
+                                        <img src="image/silver_rank.png" width="45" height="45">
+                                        <h4>Silver</h4>
+                                    </div>
+                                    <hr>
+                                    <p>Open audio feature, which let you convert text from english language to arabic language.</p>
+                                </div>
+                            </div>
+                        </span>
+
+                        <span>
+                            <div class="rank-point">
+                                <p>3000</p>
+                                <img src='image/gold_rank.png' width='60' height='60'>
+                                <p>Gold</p>
+                                <div class="rank-point-details-gold">
+                                    <div class="rank-point-details-gold-top">
+                                        <img src="image/gold_rank.png" width="45" height="45">
+                                        <h4>Gold</h4>
+                                    </div>
+                                    <hr>
+                                    <p>Open text-summarize feature, which let you convert text from english language to arabic language.</p>
+                                </div>
+                            </div>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom -->
+            <div class="bottom_main_container">
+                <div class="mission">
+                    <div class="mission-icon"><img src='image/point.png' width='60' height='60'></div>
+                    <div class="mission-info">
+                        <p class="mission-date">Tuesday, Sep 3, 2024, 10:03 PM</p>
+                        <p class="mission-desc">Completed a daily challenge for September LeetCoding Challenge 2024</p>
+                        <p class="mission-points">+10</p>
+                    </div>
+                </div>
+
+                <div class="mission">
+                    <div class="mission-icon"><img src='image/point.png' width='60' height='60'></div>
+                    <div class="mission-info">
+                        <p class="mission-date">Tuesday, Sep 3, 2024, 08:54 PM</p>
+                        <p class="mission-desc">Completed a daily check-in mission</p>
+                        <p class="mission-points">+1</p>
+                    </div>
+                </div>
+
+                <div class="mission">
+                    <div class="mission-icon"><img src='image/point.png' width='60' height='60'></div>
+                    <div class="mission-info">
+                        <p class="mission-date">Saturday, Aug 31, 2024, 06:24 AM</p>
+                        <p class="mission-desc">Completed a daily check-in mission</p>
+                        <p class="mission-points">+1</p>
+                    </div>
+                </div>
+
+                <div class="mission">
+                    <div class="mission-icon"><img src='image/point.png' width='60' height='60'></div>
+                    <div class="mission-info">
+                        <p class="mission-date">Saturday, Aug 31, 2024, 06:24 AM</p>
+                        <p class="mission-desc">Completed a daily check-in mission</p>
+                        <p class="mission-points">+1</p>
+                    </div>
+                </div>
+
+                <div class="mission">
+                    <div class="mission-icon"><img src='image/point.png' width='60' height='60'></div>
+                    <div class="mission-info">
+                        <p class="mission-date">Saturday, Aug 31, 2024, 06:24 AM</p>
+                        <p class="mission-desc">Completed a daily check-in mission</p>
+                        <p class="mission-points">+1</p>
+                    </div>
+                </div>
+
+                <button>Show more</button>
+                <br>
+            </div>
+
+        </main>
+        
+        <script src="script.js"></script>
+    </body>
+    <br>
+    <br>
+    <!-- Footer -->
+    <footer>
+        <h3>Discover, Learn & Read Your Favorite Books</h3>
+        <div class="right">
+            <div class="links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">About Us</a>
+                <a href="#">Contact Us</a>
+            </div>
+            <div class="social">
+                <i class='bx bxl-instagram'></i>
+                <i class='bx bxl-facebook-square'></i>
+                <i class='bx bxl-twitter'></i>
+            </div>
+            <p>copyright &copy; 2025 SmartLib. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+
+</html>

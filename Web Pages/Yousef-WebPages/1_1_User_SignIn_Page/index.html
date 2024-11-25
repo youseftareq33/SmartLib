@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+        <link rel="stylesheet" href="style.css">
+        <title>Login Page-SmartLib</title>
+        <link rel="icon" type="image/png" href="image/logo.png">
+    </head>
+
+    <body> 
+
+        <!-- Header -->
+        <header>
+            <a class="logo" id="logo" href='#'><img src='image/logo.png' width='60' height='60'></a>
+        </header>
+        
+        <!-- Main -->
+        <main>
+            <div class="container" id="container">
+
+                <!-- Sign In -->
+                <div class="form-container sign-in">
+                    <form>
+                        <h1>Sign In</h1>
+                        <input id="email" type="email" placeholder="Email">
+                        <input id="password" type="password" placeholder="Password">
+                        <p id="error" class="error">Please fill all fields.</p>
+                        <a href="#">Forget Your Password?</a>
+                        <button type="button" id="login">Sign In</button>
+                    </form>
+                </div>
+
+                <!-- Toggle -->
+                <div class="toggle-container">
+                    <div class="toggle">
+                        <div class="toggle-panel toggle-right">
+                            <h1>Hello, Reader!</h1>
+                            <p>Register with your personal details to use all of site features</p>
+                            <button class="hidden" id="register">Sign Up</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Script -->
+        <script src="script.js"></script>
+    </body>
+    <br>
+    <br>
+    <!-- Footer -->
+    <footer>
+        <p>copyright &copy; 2025 SmartLib. All Rights Reserved.</p>
+    </footer>
+
+</html>    
