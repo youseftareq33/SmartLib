@@ -2,11 +2,33 @@ from django.urls import path
 from .views import *
 
 
+
+
 urlpatterns = [
-    path('login',UserLoginView.as_view()),
-    path('register',RegisterAPIView.as_view()),
+    path('', guestPage, name='guestPage'),
+    path('aboutUs', aboutUsPage, name='aboutUsPage'),
+    path('privacyPolicy', privacyPolicyPage, name='privacyPolicyPage'),
+    path('login', loginPage, name='loginPage'),
+    path('registerAccount', registerPage, name='registerPage'), 
+    path('confirm_email_register/', confirm_email_register, name='confirm_email_register'), 
+    path('send_another_email/<str:email>/', send_another_email, name='send_another_email'),
+    path('activate/<uidb64>/<token>/', activate_register.as_view(), name='activate'),
+    path('find_account/', findAccountPage, name='findAccountPage'), 
+    path('confirm_email_change_password/', confirm_email_change_password, name='confirm_email_change_password'), 
+    path('send_another_email_change_pass/<str:email>/', send_another_email_change_pass, name='send_another_email_change_pass'),
+    path('activate_change_password/<uidb64>/<token>/', activate_change_password.as_view(), name='activate_change_password'),
+    path('resetPasswordPage/<str:email>/', resetPasswordPage, name='resetPasswordPage'),
+    path('homePage', homePage, name='homePage'), 
+    path('login-api', UserLoginView.as_view()),
+    path('get_username/<int:user_id>/', UserNameListView.as_view(), name='get_username'),
+    path('register-api',RegisterAPIView.as_view()),
+    path('check-email-api',EmailExistView.as_view()),
+    path('reset-password-api', reset_password.as_view()), 
     path('getAllCategories/', CategoryListView.as_view()),
     path('getAllBooks/', BookListView.as_view()),
+    path('add-to-wishlist/', AddBookToWishlist.as_view(), name='add_to_wishlist'),
+    path('remove-from-wishlist/', RemoveBookFromWishlist.as_view(), name='remove_from_wishlist'),
+    path('check-book-in-wishlist/', CheckBookInWishlist.as_view(), name='check_book_in_wishlist'),
     path('getMostReadedBook/', MostReaded_BookListView.as_view()),
     path('getMostRatingBook/', MostRating_BookListView.as_view()),
     path('getLastUploadedBook/', LastUploaded_BookListView.as_view()),

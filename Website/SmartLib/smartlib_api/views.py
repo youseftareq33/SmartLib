@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 
 # pip install djangorestframework
 from rest_framework.views import APIView
@@ -15,7 +15,7 @@ import datetime
 # pip install django-bcrypt
 import bcrypt
 
-#-------
+#--------
 # pip install urlsafe-base64-py
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
@@ -26,56 +26,319 @@ from django.db.models import Q
 from django.db.models import Avg
 from django.db.models import Count
 from django.db.models import Case, When, Value
+from django.db.utils import IntegrityError
 
-# notes:- guest page_contactUs, regiseration process, book_favourite_counter manual !!!, insert book
+#----------
+from django.contrib.auth.tokens import default_token_generator 
+from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
+from django.conf import settings
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils import timezone
+from django.contrib import messages
+
+# notes:- guest page_contactUs, regiseration process, book_favourite_counter manual !!!, insert book, copy url confirm register page
+
+#-- redirect page --
+
+def guestPage(request):
+    return render(request, '1_1_guestHome_page.html')
+
+def aboutUsPage(request):
+    return render(request, '1_2_aboutUs_page.html')
+
+def privacyPolicyPage(request):
+    return render(request, '1_3_privacyPolicy_page.html')
+
+def loginPage(request):
+    return render(request, '2_login_page.html')
+
+def registerPage(request):
+    return render(request, '3_register_page.html')
+
+def confirm_email_register(request):
+    email = request.GET.get('email', '')  # Retrieve email from query parameters
+    return render(request, '4_1_confirm_email_register_page.html', {'email': email})
+
+def findAccountPage(request):
+    return render(request, '5_1_find_account_forgetPass_page.html')
+
+def confirm_email_change_password(request):
+    email = request.GET.get('email', '')  # Retrieve email from query parameters
+    return render(request, '5_2_confirm_email_forgetPass_page.html', {'email': email})
+
+def resetPasswordPage(request, email):
+    return render(request, '5_4_reset_password_page.html', {'email': email})
+
+def homePage(request):
+    return render(request, '6_home_page.html')
+#--------------------------------------------------------------------------------------------
 
 
-#-- login
+#-- login --
+
+
 class UserLoginView(APIView):
     def post(self, request):
         email = request.data.get('email')
         user_password = request.data.get('user_password')
 
+
         try:
-            user = User.objects.get(email=email, user_password=user_password)
+            # Retrieve the user by email
+            user = User.objects.get(email=email)
+            
+            # Verify the password using bcrypt
+            if not bcrypt.checkpw(user_password.encode('utf-8'), user.user_password.encode('utf-8')):
+                raise AuthenticationFailed("Incorrect password!", status=status.HTTP_401_UNAUTHORIZED)
+            else:
+                if user.is_active:
+                    payload = {
+                        'id': user.user_id,
+                        'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=180), # 3 hours
+                        'iat': datetime.datetime.utcnow()
+                    }
+
+                    token = jwt.encode(payload, 'secret', algorithm='HS256')
+
+                    return Response({'jwt': token}, status=status.HTTP_200_OK)
+                else:
+                    raise AuthenticationFailed("Your account has not activated yet.", status=status.HTTP_401_UNAUTHORIZED)
+                    
         except User.DoesNotExist:
             raise AuthenticationFailed("User not found or incorrect password!", status=status.HTTP_401_UNAUTHORIZED)
-
-       
-        payload = {
-            'id': user.user_id,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30),
-            'iat': datetime.datetime.utcnow()
-        }
-
-        token = jwt.encode(payload, 'secret', algorithm='HS256')
-
-        return Response({
-            'jwt': token
-        }, status=status.HTTP_200_OK)
+#--------------------------------------------------------------------------------------------
 
 
+#-- register--
 
 
-#-- register
 class RegisterAPIView(APIView):
     def post(self, request):
-        user_name = request.data.get('user_name')
-        email = request.data.get('email')
-        user_password = request.data.get('user_password')
+
+        try:
+            user_name = request.data.get('user_name')
+            email = request.data.get('email')
+            user_password = request.data.get('user_password')
+            
+            # Hash the password using bcrypt and verify hashing
+            hashed_password = bcrypt.hashpw(user_password.encode('utf-8'), bcrypt.gensalt())
+
+            # Save the user with the hashed password
+            user = User(user_name=user_name, email=email, user_password=hashed_password)
+            user.save()
+
+            reader=Reader(user=user)
+            reader.save()
+
+            send_verification_email_register(user=user,request=request)
+
+            return Response(
+                {
+                'message': 'User registered successfully. Please check your email to verify your account.',
+                'email': email
+                }, status=status.HTTP_200_OK)
         
-        # Hash the password using bcrypt and verify hashing
-        hashed_password = bcrypt.hashpw(user_password.encode('utf-8'), bcrypt.gensalt())
+        except IntegrityError as e:
+            if 'unique constraint' in str(e):
+                return Response({'error': 'This email address is already in use.'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({'error': 'An error occurred.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#--------------------------------------------------------------------------------------------
 
-        # Save the user with the hashed password
-        user = User(user_name=user_name, email=email, user_password=hashed_password)
-        user.save()
 
-        reader=Reader(user=user)
-        reader.save()
+#-- register confirmation process --
 
-        return Response({'message': 'User registered successfully. Please check your email to verify your account.'}, status=status.HTTP_200_OK)
+
+class ExpiringTokenGenerator_register(PasswordResetTokenGenerator):
+    def make_token(self, user):
+        """
+        Override the default method to include an expiration time (30 minute).
+        """
+        timestamp = str(int(timezone.now().timestamp()))  # Current timestamp
+        expiration_time = (timezone.now() + datetime.timedelta(minutes=30)).timestamp()  # Token expires in 30 minute
+        return f"{super().make_token(user)}-{int(expiration_time)}"  # Append expiration time to token
+
+    def check_token(self, user, token):
+        """
+        Override the default method to check if the token has expired.
+        """
+        try:
+            base_token, expiration_time = token.rsplit('-', 1)
+            expiration_time = float(expiration_time)
+            if timezone.now().timestamp() > expiration_time:
+                return False  # Token is expired
+            return super().check_token(user, base_token)
+        except (ValueError, IndexError):
+            return False  # Invalid token format
+
+token_generator_register = ExpiringTokenGenerator_register()
+
+# send email for register
+def send_verification_email_register(user, request):
     
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = token_generator_register.make_token(user)  # Use the custom token generator
+
+    mail_subject = 'Activate your account.'
+    message = render_to_string('4_2_email_templet_register.html', {
+        'user': user,
+        'domain': request.get_host(),
+        'uid': uid,
+        'token': token,
+        'user_name': user.user_name,
+    })
+
+    email_message = EmailMultiAlternatives(
+        mail_subject,
+        message,
+        settings.EMAIL_HOST_USER,
+        [user.email],
+    )
+    email_message.attach_alternative(message, "text/html")
+    email_message.send()
+
+
+def send_another_email(request, email):
+    try:
+        user = User.objects.get(email=email)
+        send_verification_email_register(user, request)
+        return JsonResponse({'message': 'Verification email sent successfully.'})
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User with the provided email does not exist.'}, status=404)
+
+    
+class activate_register(APIView):
+    def get(self, request, uidb64, token):
+        try:
+            # Decode user ID from the token
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            return Response({'error': 'Invalid activation link.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if the token is valid and not expired
+        if token_generator_register.check_token(user, token) and not user.is_active:
+            user.is_active = True
+            user.save()
+            messages.success(request, 'Your account has been activated successfully.')
+            return redirect('loginPage')  # This should return a redirect response
+        elif user.is_active:
+            messages.info(request, 'Your account is already activated.')
+            return redirect('loginPage')  # This should return a redirect response
+        else: ####################### change
+            messages.error(request, 'Activation link is invalid or expired.')
+            return redirect('loginPage')  # This should return a redirect response
+#--------------------------------------------------------------------------------------------
+
+
+#-- forget password process --
+
+
+class EmailExistView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        try:
+            # Retrieve the user by email
+            user = User.objects.get(email=email)
+            return Response({"exists": True, "message": "Email is found."}, status=status.HTTP_200_OK)       
+        except User.DoesNotExist:
+            return Response({"exists": False, "message": "Email not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+class ExpiringTokenGenerator_forget_pass(PasswordResetTokenGenerator):
+    def make_token(self, user):
+        """
+        Override the default method to include an expiration time (30 minute).
+        """
+        timestamp = str(int(timezone.now().timestamp()))  # Current timestamp
+        expiration_time = (timezone.now() + datetime.timedelta(minutes=30)).timestamp()  # Token expires in 30 minute
+        return f"{super().make_token(user)}-{int(expiration_time)}"  # Append expiration time to token
+
+    def check_token(self, user, token):
+        """
+        Override the default method to check if the token has expired.
+        """
+        try:
+            base_token, expiration_time = token.rsplit('-', 1)
+            expiration_time = float(expiration_time)
+            if timezone.now().timestamp() > expiration_time:
+                return False  # Token is expired
+            return super().check_token(user, base_token)
+        except (ValueError, IndexError):
+            return False  # Invalid token format
+
+token_generator_forget_pass = ExpiringTokenGenerator_forget_pass()
+
+# send email for change password
+def send_verification_email_forget_pass(user, request):
+    
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = token_generator_forget_pass.make_token(user)  # Use the custom token generator
+
+    mail_subject = 'Change Account Password.'
+    message = render_to_string('5_3_email_templet_forgetPass.html', {
+        'user': user,
+        'domain': request.get_host(),
+        'uid': uid,
+        'token': token,
+        'user_name': user.user_name,
+    })
+
+    email_message = EmailMultiAlternatives(
+        mail_subject,
+        message,
+        settings.EMAIL_HOST_USER,
+        [user.email],
+    )
+    email_message.attach_alternative(message, "text/html")
+    email_message.send()
+
+
+def send_another_email_change_pass(request, email):
+    try:
+        user = User.objects.get(email=email)
+        send_verification_email_forget_pass(user, request)
+        return JsonResponse({'message': 'Verification email sent successfully.'})
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User with the provided email does not exist.'}, status=404)
+
+class activate_change_password(APIView):
+    def get(self, request, uidb64, token):
+        try:
+            # Decode user ID from the token
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+            email = user.email
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            return Response({'error': 'Invalid activation link.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if the token is valid and not expired
+        if token_generator_forget_pass.check_token(user, token):
+            return redirect('resetPasswordPage',email)  # This should return a redirect response
+        else: ####################### change
+            messages.error(request, 'Activation link is invalid or expired.')
+            return redirect('loginPage')  # This should return a redirect response  
+
+class reset_password(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        user_password=request.data.get('user_password')
+
+        try:
+            # Retrieve the user by email
+            user = User.objects.get(email=email)
+
+            # Hash the password using bcrypt and verify hashing
+            hashed_password = bcrypt.hashpw(user_password.encode('utf-8'), bcrypt.gensalt())
+
+            user.user_password = hashed_password
+            user.save()
+            messages.success(request, 'Your account has reset password successfully.')
+            return redirect('loginPage')      
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+#--------------------------------------------------------------------------------------------
 
 
 #-- list category
@@ -84,7 +347,22 @@ class CategoryListView(APIView):
         categories = Category.objects.all()
         serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
+#--------------------------------------------------------------------------------------------
+
+#-- get name from id
+class UserNameListView(APIView):
+    def get(self, request, user_id):
+        try:
+            # Fetch the user by ID
+            user = User.objects.get(user_id=user_id)
+            # Return the user_name
+            return Response({"user_name": user.user_name}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+#--------------------------------------------------------------------------------------------
 
 #-- list book (pagination achived)
 class BookListView(APIView):
@@ -410,14 +688,19 @@ class NotificationListView(APIView):
 class InsertFeedbackView(APIView):
     def post(self, request):
         # Get the reader_id and feedback description from the request data
-        reader_id = request.data.get('reader_id')
+        user_id = request.data.get('user_id')
         feedback_description = request.data.get('feedback_description')
 
-        if not reader_id or not feedback_description:
-            return Response({"error": "Reader ID and feedback description are required"}, status=status.HTTP_400_BAD_REQUEST)
+        if not user_id or not feedback_description:
+            return Response({"error": "User ID and feedback description are required"}, status=status.HTTP_400_BAD_REQUEST)
         
         # Create a new FeedBack record
-        feedback = FeedBack.objects.create(reader_id=reader_id, feedback_description=feedback_description)
+        try:
+            reader = Reader.objects.get(user_id=user_id)
+        except Reader.DoesNotExist:
+            return Response({"error": "Reader not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        feedback = FeedBack.objects.create(reader_id=reader.reader_id, feedback_description=feedback_description)
 
         # Serialize the feedback object
         serializer = FeedBackSerializer(feedback)
@@ -470,3 +753,90 @@ class CreateBookView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+
+class AddBookToWishlist(APIView):
+    def post(self, request):
+        # Retrieve book_id and user_id from the request body
+        book_id = request.data.get('book_id')
+        user_id = request.data.get('user_id')
+
+        # Validate book_id and user_id
+        if not book_id or not user_id:
+            return Response({"error": "Book ID and User ID are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Retrieve the reader associated with the user
+        try:
+            reader = Reader.objects.get(user_id=user_id)
+        except Reader.DoesNotExist:
+            return Response({"error": "Reader not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Validate the book existence
+        try:
+            book = Book.objects.get(book_id=book_id)
+        except Book.DoesNotExist:
+            return Response({"error": "Book not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if the book is already in the wishlist
+        if WishList.objects.filter(book=book, reader=reader).exists():
+            return Response({"error": "Book already in wishlist"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Add the book to the wishlist
+        WishList.objects.create(book=book, reader=reader)
+
+        # Increment the book's favorite counter
+        book.book_favourite_counter = (book.book_favourite_counter or 0) + 1
+        book.save(update_fields=['book_favourite_counter'])
+
+        return Response(
+            {"message": "Book added to wishlist", "book_favourite_counter": book.book_favourite_counter},
+            status=status.HTTP_201_CREATED
+        )
+
+
+
+    
+class RemoveBookFromWishlist(APIView):
+    def post(self, request):
+        book_id = request.data.get('book_id')
+        user_id = request.data.get('user_id')
+
+        # Retrieve the reader associated with the user
+        try:
+            reader = Reader.objects.get(user_id=user_id)
+        except Reader.DoesNotExist:
+            return Response({"error": "Reader not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Remove the book from the wishlist
+        try:
+            wishlist_item = WishList.objects.get(book_id=book_id, reader_id=reader.reader_id)
+            wishlist_item.delete()
+
+            # Optionally, decrement the book's favourite counter here
+            book = Book.objects.get(book_id=book_id)
+            book.book_favourite_counter -= 1
+            book.save()
+
+            return Response({"message": "Book removed from wishlist"}, status=status.HTTP_200_OK)
+        except WishList.DoesNotExist:
+            return Response({"error": "Book not in wishlist"}, status=status.HTTP_400_BAD_REQUEST)
+        
+class CheckBookInWishlist(APIView):
+    def get(self, request):
+        book_id = request.query_params.get('book_id')
+        user_id = request.query_params.get('user_id')
+
+        # Retrieve the reader associated with the user
+        try:
+            reader = Reader.objects.get(user_id=user_id)
+        except Reader.DoesNotExist:
+            return Response({"error": "Reader not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if the book is in the wishlist
+        if WishList.objects.filter(book_id=book_id, reader_id=reader.reader_id).exists():
+            return Response({"in_wishlist": True}, status=status.HTTP_200_OK)
+        else:
+            return Response({"in_wishlist": False}, status=status.HTTP_200_OK)
+
+
+        
+

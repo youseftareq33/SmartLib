@@ -7,10 +7,16 @@ from django.utils.timezone import now
 class User(models.Model):
     user_id = models.AutoField(primary_key=True)
     user_name = models.CharField(max_length=255)
-    email = models.CharField(max_length=255)
+    email = models.EmailField(unique=True)
     user_password=models.CharField(max_length=255)
     is_active = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
+    last_login = models.DateTimeField(null=True, default=now)
+    @property
+    def password(self):
+        return self.user_password
+    def get_email_field_name(self):
+        return "email"
     class Meta:
         db_table = 'User'
 
