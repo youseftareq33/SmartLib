@@ -177,9 +177,89 @@ function hideDropdown_fav_list() {
     }, 200);  // Delay of 100ms before closing
 }
 
-// Event listener for when mouse enters the button
-fav_list_Button.addEventListener('mouseenter', () => {
-    showDropdown_fav_list();
+document.addEventListener('DOMContentLoaded', () => {
+    // Event listener for when mouse enters the button
+    fav_list_Button.addEventListener('mouseenter', () => {
+        showDropdown_fav_list();
+
+        const empty_wishList = document.getElementById('empty_wishList');
+        const notEmpty_wishList = document.getElementById('notEmpty_wishList');
+
+        empty_wishList.style.display = 'block';
+        notEmpty_wishList.style.display = 'none';
+
+        const wishList_1 = document.getElementById('wishList-item_1');
+        const wishList_2 = document.getElementById('wishList-item_2');
+        const wishList_3 = document.getElementById('wishList-item_3');
+        
+
+        wishList_1.style.display = 'none';
+        wishList_2.style.display = 'none';
+        wishList_3.style.display = 'none';
+
+        // const notificationList = [
+        //     document.getElementById('notifi-item_1'),
+        //     document.getElementById('notifi-item_2'),
+        //     document.getElementById('notifi-item_3')
+        // ];
+
+        
+        // notificationList.forEach((notificationElement, index) => {
+        //     if (notificationElement) { // Ensure the element exists
+        //         notificationElement.addEventListener('click', () => {
+        //             window.location.href = `/`; // Example URL
+        //         });
+        //     }
+        // });
+        
+
+        // Fetch initial data when page loads
+        fetch(`/getLastThreeWishListView?user_id=${userId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch wishList');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if(data){
+                    empty_wishList.style.display = 'none';
+                    notEmpty_wishList.style.display = 'block';
+
+                    data.forEach((wishList, index) => {
+                        const wishList_title = document.getElementById(`wishList-item_title_${index + 1}`);
+                        const wishList_author = document.getElementById(`wishList-item_author_${index + 1}`);
+                        const wishList_category = document.getElementById(`wishList-item_category_${index + 1}`);
+                        const wishList_image=document.getElementById(`wishList-item_image_${index + 1}`);
+                        const wishList_item = document.getElementById(`wishList-item_${index + 1}`);
+                
+                        // If there is data for the notification, display the notification item
+                        if (wishList) {
+                            wishList_item.style.display = 'flex'; // Make the notification item visible
+
+                            // wishList details
+                            wishList_title.textContent = wishList.book_name || 'Title...';
+                            wishList_author.textContent = `Author: ${wishList.book_author || 'No Author'}`;
+                            wishList_category.textContent = `Category: ${wishList.book_type || 'No Category'}`;
+                
+                            // image
+                            if (wishList.book_image) {
+                                wishList_image.src = wishList.book_image;
+                            }
+                            
+                        } else {
+                            // If no data for the wishList, hide the book item
+                            wishList_item.style.display = 'none';
+                        }
+                    });
+                    
+                }
+                
+            })
+            .catch(error => {
+                console.error('Error fetching notification:', error);
+            });
+        });
 });
 
 // Event listener for when mouse leaves the button
@@ -206,6 +286,10 @@ function handleOptionClick_fav_list(fav_list) {
     dropdown_fav_list.style.display = 'none';  // Hide dropdown after selection
 }
 
+
+
+
+
 //---------------------------------------------------------------------------------------
 
 //-- notification --
@@ -231,8 +315,93 @@ function hideDropdown_notification() {
 }
 
 // Event listener for when mouse enters the categories button
-notification_Button.addEventListener('mouseenter', () => {
+document.addEventListener('DOMContentLoaded', () => {
+    notification_Button.addEventListener('mouseenter', () => {
     showDropdown_notification();
+    const empty_notification = document.getElementById('empty_notification');
+    const notEmpty_notification = document.getElementById('notEmpty_notification');
+
+    empty_notification.style.display = 'block';
+    notEmpty_notification.style.display = 'none';
+
+    const notification_1 = document.getElementById('notifi-item_1');
+    const notification_2 = document.getElementById('notifi-item_2');
+    const notification_3 = document.getElementById('notifi-item_3');
+    
+
+    notification_1.style.display = 'none';
+    notification_2.style.display = 'none';
+    notification_3.style.display = 'none';
+
+    const notificationList = [
+        document.getElementById('notifi-item_1'),
+        document.getElementById('notifi-item_2'),
+        document.getElementById('notifi-item_3')
+    ];
+
+    
+    notificationList.forEach((notificationElement, index) => {
+        if (notificationElement) { // Ensure the element exists
+            notificationElement.addEventListener('click', () => {
+                window.location.href = `/`; // Example URL
+            });
+        }
+    });
+    
+
+    // Fetch initial data when page loads
+    fetch(`/getLastThreeNotificationListView?user_id=${userId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch notification');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if(data){
+                empty_notification.style.display = 'none';
+                notEmpty_notification.style.display = 'block';
+
+                data.forEach((notification, index) => {
+                    const notifi_title = document.getElementById(`notifi-item_title_${index + 1}`);
+                    const notifi_content = document.getElementById(`notifi-item_content_${index + 1}`);
+                    const notifi_image=document.getElementById(`notifi-item_image_${index + 1}`);
+                    const notifi_item = document.getElementById(`notifi-item_${index + 1}`);
+            
+                    // If there is data for the notification, display the notification item
+                    if (notification) {
+                        notifi_item.style.display = 'flex'; // Make the notification item visible
+            
+                        // notification notification details
+                        notifi_title.textContent = notification.notification_title || 'Title...';
+                        notifi_content.textContent = notification.notification_record || 'No content...';
+            
+                        // image
+                        if (notification.notification_title=="Accept Uploaded Book") {
+                            notifi_image.src = '/static/images/accept.png'; 
+                        }
+                        else if(notification.notification_title=="Rejected Uploaded Book"){
+                            notifi_image.src = '/static/images/reject.png'; 
+                        }
+                        else if(notification.notification_title=="New Point Achievement"){
+                            notifi_image.src = '/static/images/point.png'; 
+                        }
+                        
+                    } else {
+                        // If no data for the notification, hide the book item
+                        notifi_item.style.display = 'none';
+                    }
+                });
+                
+            }
+            
+        })
+        .catch(error => {
+            console.error('Error fetching notification:', error);
+        });
+    
+    });
+    
 });
 
 // Event listener for when mouse leaves the categories button
@@ -260,7 +429,6 @@ dropdown_notification.addEventListener('mouseleave', (event) => {
 function handleOptionClick_notification(notification) {
     dropdown_notification.style.display = 'none';  // Hide dropdown after selection
 }
-
 //---------------------------------------------------------------------------------------
 //-- user --
 

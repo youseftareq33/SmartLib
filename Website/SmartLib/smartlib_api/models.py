@@ -125,6 +125,7 @@ class Notification(models.Model):
     reader = models.ForeignKey('Reader', on_delete=models.CASCADE, db_column='reader_id')
     manager = models.ForeignKey('Manager', on_delete=models.CASCADE, db_column='manager_id')
     notification_record = models.CharField(max_length=255)
+    notification_title = models.CharField(max_length=255)
     class Meta:
         db_table = 'Notification'
         unique_together = (('notification_id', 'reader', 'manager'),)

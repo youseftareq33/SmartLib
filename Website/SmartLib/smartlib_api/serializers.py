@@ -35,7 +35,7 @@ class WishListSerializer(serializers.ModelSerializer):
 class NotificationListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
-        fields = ["notification_record"]
+        fields = '__all__'
 
 class FeedBackSerializer(serializers.ModelSerializer):
     class Meta:

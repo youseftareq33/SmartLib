@@ -176,7 +176,7 @@ header{
 .right-header-container .fav_list_dropdown {
     display: none;
     position: absolute;
-    height: 100px;
+    height: auto;
     width: 300px;
     top: 78px;
     right: 130px;
@@ -185,9 +185,22 @@ header{
     list-style: none;
     padding: 6px 10px;
     z-index: 1;
-    max-height: 250px;
+    max-height: 265px; 
     overflow-y: auto;
     border-radius: 10px;
+}
+
+.right-header-container .fav_list_dropdown::-webkit-scrollbar {
+    width: 10px;
+}
+
+.right-header-container .fav_list_dropdown::-webkit-scrollbar-thumb {
+    background-color: #3f48cc;
+    border-radius: 10px;
+}
+
+.right-header-container .fav_list_dropdown::-webkit-scrollbar-track {
+    background: #b7b7b7;
 }
 
 
@@ -200,7 +213,7 @@ header{
 .right-header-container .notification_dropdown {
     display: none;
     position: absolute;
-    height: 100px;
+    height: auto;
     width: 300px;
     top: 78px; 
     right: 76px; 
@@ -212,9 +225,70 @@ header{
     padding-right: 10px;
     padding-bottom: 6px;
     z-index: 1; 
-    max-height: 250px; /* dont forget this when increase height (40px)*/
+    max-height: 265px; 
     overflow-y: auto; 
     border-radius: 10px;
+}
+
+.right-header-container .notification_dropdown::-webkit-scrollbar {
+    width: 10px;
+}
+
+.right-header-container .notification_dropdown::-webkit-scrollbar-thumb {
+    background-color: #3f48cc;
+    border-radius: 10px;
+}
+
+.right-header-container .notification_dropdown::-webkit-scrollbar-track {
+    background: #b7b7b7;
+}
+
+.notifi-item{
+    display: flex;
+	border-bottom: 1px solid #eee;
+	padding: 15px 5px;
+	margin-bottom: 15px;
+	cursor: pointer;
+}
+
+.notifi-item:hover{
+    background-color: #eee;
+}
+
+.notifi-item img {
+	display: block;
+	width: 40px;
+    height: 40px;
+	margin-right: 10px;
+    align-self: center;
+    object-fit: contain;
+}
+
+.notifi-item .text h4 {
+	color: #777;
+	font-size: 16px;
+	margin-top: 10px;
+}
+
+.notifi-item .text p {
+	color: #aaa;
+	font-size: 12px;
+}
+.view-all {
+    text-align: center;
+    padding: 10px 0;
+    background-color: #3f48cc;
+}
+
+.view-all a {
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.view-all a:hover {
+    text-decoration: underline;
 }
 
 .right-header-container .user .img_user{
@@ -226,7 +300,7 @@ header{
 .right-header-container .dropdown-user {
     display: none;
     position: absolute;
-    height: 250px;
+    height: 295px;
     top: 78px; 
     right: 20px; 
     background-color: #fff;
@@ -237,7 +311,7 @@ header{
     padding-right: 10px;
     padding-bottom: 6px;
     z-index: 1; 
-    max-height: 250px; /* dont forget this when increase height (40px)*/
+    max-height: 295px; /* dont forget this when increase height (40px)*/
     overflow-y: auto; 
     border-radius: 10px;
 }
@@ -254,6 +328,29 @@ header{
     color: #FFD700;
     background-color: #fef7f7;
 }
+
+.right-header-container .dropdown-user li{
+    display: flex;
+    align-items: center;
+    align-self: center;
+    justify-content: space-between;
+    flex-direction: row;
+}
+
+.right-header-container .dropdown-user .logout {
+    margin-top: 3px;
+    color: #fef7f7; 
+    background-color: #3f48cc;
+    justify-content: center;
+    transition: color 0.3s ease; 
+    height: 35px;
+}
+
+.right-header-container .dropdown-user .logout:hover {
+    background-color: #575fd5; 
+    color: #fef7f7; 
+}
+
 
 .right-header-container .feedback-stack {
     display: none;

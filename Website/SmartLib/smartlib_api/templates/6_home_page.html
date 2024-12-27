@@ -36,25 +36,89 @@
                 <a class="fav_list" id="fav_list" href='#'><img id="img_fav_list" src='{% static "images/fav_list.png" %}' width='24' height='25'></a>
                 <div class="fav_list_dropdown" id="fav_list_dropdown">
                     <h2>WishList</h2>
-                    <br>
-                    <p>Your wishlist is empty.</p>
+                    <div id="empty_wishList">
+                        <br>
+                        <p>Your wishlist is empty.</p>
+                    </div>
+                    <div id="notEmpty_wishList" class="notEmpty_notification">
+                        <div id="wishList-item_1" class="notifi-item">
+                            <img id="wishList-item_image_1" src='{% static "images/book.png" %}' alt="img">
+                            <div class="text">
+                                <h4 id="wishList-item_title_1">Title....</h4>
+                                <p id="wishList-item_author_1">Author: null..</p>
+                                <p id="wishList-item_category_1">Category: null..</p>
+                            </div> 
+                        </div>
+                        <div id="wishList-item_2" class="notifi-item">
+                            <img id="wishList-item_image_2" src='{% static "images/book.png" %}' alt="img">
+                            <div class="text">
+                                <h4 id="wishList-item_title_2">Title....</h4>
+                                <p id="wishList-item_author_2">Author: null..</p>
+                                <p id="wishList-item_category_2">Category: null..</p>
+                            </div> 
+                        </div>
+                        <div id="wishList-item_3" class="notifi-item">
+                            <img id="wishList-item_image_3" src='{% static "images/book.png" %}' alt="img">
+                            <div class="text">
+                                <h4 id="wishList-item_title_3">Title....</h4>
+                                <p id="wishList-item_author_3">Author: null..</p>
+                                <p id="wishList-item_category_3">Category: null..</p>
+                            </div> 
+                        </div>
+                        <div id="viewAll_wishList" class="view-all">
+                            <a href="#">View All WishList</a>
+                        </div>
+                    </div>
                 </div>
 
                 <a class="notification" id="notification" href='#'><img id="img_notification" src='{% static "images/empty_notification.png" %}' width='24' height='25'></a>
                 <div class="notification_dropdown" id="notification_dropdown">
                     <h2>Notification</h2>
-                    <br>
-                    <p>No new notifications.</p>
+                    <div id="empty_notification">
+                        <br>
+                        <p>No new notifications.</p>
+                    </div>
+                    <div id="notEmpty_notification" class="notEmpty_notification">
+                        <div id="notifi-item_1" class="notifi-item">
+                            <img id="notifi-item_image_1" src='{% static "images/reject.png" %}' alt="img">
+                            <div class="text">
+                                <h4 id="notifi-item_title_1">Title....</h4>
+                                <p id="notifi-item_content_1">Content...</p>
+                            </div> 
+                        </div>
+                        <div id="notifi-item_2" class="notifi-item">
+                            <img id="notifi-item_image_2" src='{% static "images/accept.png" %}' alt="img">
+                            <div class="text">
+                                <h4 id="notifi-item_title_2">Title....</h4>
+                                <p id="notifi-item_content_2">Content...</p>
+                            </div> 
+                        </div>
+                        <div id="notifi-item_3" class="notifi-item">
+                            <img id="notifi-item_image_3" src='{% static "images/point.png" %}' alt="img">
+                            <div class="text">
+                                <h4 id="notifi-item_title_3">Title....</h4>
+                                <p id="notifi-item_content_3">Content...</p>
+                            </div> 
+                        </div>
+                        <div id="viewAll_notification" class="view-all">
+                            <a href="#">View All Notifications</a>
+                        </div>
+                    </div>
                 </div>
 
                 <a class="user" id="user" href='#'><img id="img_user" src='{% static "images/user.png" %}' width='27' height='25'></a>
                 <ul class="dropdown-user" id="dropdown-user">
+                    <li onclick="handleOptionClick_user('User Profile')">
+                        <p id="user_rank">Rank: Bronze</p>
+                        <img id="img_rank" src='{% static "images/bronze_rank.png" %}' alt="img" width='25' height='25'>
+                    </li>
+                    <hr>
                     <li onclick="handleOptionClick_user('User Profile')">User Profile</li>
                     <li onclick="handleOptionClick_user('My Uploaded Book')">My Uploaded Book</li>
                     <li onclick="handleOptionClick_user('Wish List')">Wish List</li>
                     <li onclick="handleOptionClick_user('Notification')">Notification</li>
                     <li onclick="handleOptionClick_user('Send FeedBack')">Send FeedBack</li>
-                    <li onclick="handleOptionClick_user('Log out')">Log out</li>
+                    <li onclick="handleOptionClick_user('Log out')" class="logout">Log out</li>
                 </ul>
 
                 <div class="feedback-stack" id="feedback-stack">

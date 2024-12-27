@@ -373,6 +373,7 @@ class BookListView(APIView):
         serializer = BookSerializer(result_page, many=True)  
         return paginator.get_paginated_response(serializer.data)
     
+#--------------------------------------------------------------------------------------------
 
 #-- list most readed book (pagination achived)
 class MostReaded_BookListView(APIView):
@@ -383,6 +384,7 @@ class MostReaded_BookListView(APIView):
         serializer = BookSerializer(result_page, many=True)
         return paginator.get_paginated_response(serializer.data)
 
+#--------------------------------------------------------------------------------------------
 
 #-- list last uploaded book (pagination achived)
 class LastUploaded_BookListView(APIView):
@@ -393,6 +395,7 @@ class LastUploaded_BookListView(APIView):
         serializer = BookSerializer(result_page, many=True)
         return paginator.get_paginated_response(serializer.data)
     
+#--------------------------------------------------------------------------------------------
 
 #-- add rating and review
 class AddRatingAndReviewView(APIView):
@@ -437,6 +440,8 @@ class AddRatingAndReviewView(APIView):
 
         return Response({"message": "Rating and review added successfully."}, status=status.HTTP_201_CREATED)
     
+#--------------------------------------------------------------------------------------------
+
 #-- list Most Rating book (pagination achived)
 class MostRating_BookListView(APIView):
     def get(self, request):
@@ -446,6 +451,7 @@ class MostRating_BookListView(APIView):
         serializer = BookSerializer(result_page, many=True)
         return paginator.get_paginated_response(serializer.data)
     
+#--------------------------------------------------------------------------------------------
 
 #-- list searched book
 class BookSearchView(APIView):
@@ -491,25 +497,6 @@ class BookSearchView(APIView):
     
 
 #-----------------------------------Reader
-#-- list most readed book based on reader preferences (pagination achived)
-# class MostReadedPreferences_BookListView(APIView):
-#     def get(self, request):
-#         user = request.user
-#         if not user.is_authenticated:
-#             return Response({"error": "User not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
-        
-#         # Get categories from user preferences
-#         user_preferences = Preferences.objects.filter(reader__user=user).values_list('category', flat=True)
-        
-#         # Filter books based on the user's preferred categories
-#         books = Book.objects.filter(category__in=user_preferences).order_by('-book_reading_counter')
-        
-#         # Apply pagination
-#         paginator = BookPagination()
-#         result_page = paginator.paginate_queryset(books, request)
-#         serializer = BookSerializer(result_page, many=True)
-        
-#         return paginator.get_paginated_response(serializer.data)
 
 class MostReadedPreferences_BookListView(APIView):
     def get(self, request):
@@ -529,6 +516,7 @@ class MostReadedPreferences_BookListView(APIView):
         
         return paginator.get_paginated_response(serializer.data)
     
+#--------------------------------------------------------------------------------------------
 
 class MostRatingPreferences_BookListView(APIView):
     def get(self, request):
@@ -550,6 +538,8 @@ class MostRatingPreferences_BookListView(APIView):
         
         return paginator.get_paginated_response(serializer.data)
 
+#--------------------------------------------------------------------------------------------
+
 class LastUploadedPreferences_BookListView(APIView):
     def get(self, request):
         # Get the user_id from query parameters
@@ -570,6 +560,8 @@ class LastUploadedPreferences_BookListView(APIView):
         
         return paginator.get_paginated_response(serializer.data)
 
+#--------------------------------------------------------------------------------------------
+
 #-- list continue reading book (pagination achived)
 class BookContinueReadingListView(APIView):
     def get(self, request):
@@ -588,16 +580,21 @@ class BookContinueReadingListView(APIView):
 
         return paginator.get_paginated_response(serializer.data)
     
+#--------------------------------------------------------------------------------------------
 
 class LastThreeWishListView(APIView):
     def get(self, request):
-        # Get the reader_id from query parameters
-        reader_id = request.query_params.get('reader_id')
-        if not reader_id:
-            return Response({"error": "Reader ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_id = request.query_params.get('user_id')
+
+        # Retrieve the reader associated with the user
+        try:
+            reader = Reader.objects.get(user_id=user_id)
+        except Reader.DoesNotExist:
+            return Response({"error": "Reader not found"}, status=status.HTTP_400_BAD_REQUEST)
         
         # Get the last three wishlist items for the given reader, ordered by `wish_list_id`
-        last_three_items = WishList.objects.filter(reader_id=reader_id).order_by('-wish_list_id')[:3]
+        last_three_items = WishList.objects.filter(reader_id=reader.reader_id).order_by('-wish_list_id')[:3]
         
         # Extract the book_ids from the last three wishlist items, preserving the order
         book_ids = [item.book_id for item in last_three_items]
@@ -614,24 +611,33 @@ class LastThreeWishListView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     
+#--------------------------------------------------------------------------------------------
 
 class LastThreeNotificationListView(APIView):
     def get(self, request):
         # Get the reader_id from query parameters
-        reader_id = request.query_params.get('reader_id')
-        if not reader_id:
-            return Response({"error": "Reader ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_id = request.query_params.get('user_id')
+
+        # Retrieve the reader associated with the user
+        try:
+            reader = Reader.objects.get(user_id=user_id)
+        except Reader.DoesNotExist:
+            return Response({"error": "Reader not found"}, status=status.HTTP_400_BAD_REQUEST)
+        
         
         # Get the last three notifications for the given reader, ordered by `notification_id`
-        last_three_items = Notification.objects.filter(reader_id=reader_id).order_by('-notification_id')[:3]
+        last_three_items = Notification.objects.filter(reader_id=reader.reader_id).order_by('-notification_id')[:3]
         
-        # Extract only the notification_record from each item
-        notification_records = [item.notification_record for item in last_three_items]
+        # Serialize the Book objects
+        serializer = NotificationListSerializer(last_three_items, many=True)
         
-        # Return the list of notification records
-        return Response(notification_records, status=status.HTTP_200_OK)
+        # Return the serialized data
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    
+
+#--------------------------------------------------------------------------------------------
+
 #-- list wishlist (pagination achived)
 class WishListListView(APIView):
     def get(self, request):
@@ -660,99 +666,8 @@ class WishListListView(APIView):
 
         # Return the paginated response with serialized data
         return paginator.get_paginated_response(serializer.data)
-
-
-#-- list notification (pagination achived)
-class NotificationListView(APIView):
-    def get(self, request):
-        # Get the reader_id from query parameters
-        reader_id = request.query_params.get('reader_id')
-        if not reader_id:
-            return Response({"error": "Reader ID is required"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Get the notifications for the given reader
-        notifications = Notification.objects.filter(reader_id=reader_id).order_by('-notification_id')
-
-        # Apply pagination
-        paginator = NotificationPagination()
-        result_page = paginator.paginate_queryset(notifications, request)
-
-        # Extract the notification_record from each item
-        notification_records = [item.notification_record for item in result_page]
-
-        # Return the paginated response with notification records
-        return paginator.get_paginated_response(notification_records)
-
-
-#-- insert feedback
-class InsertFeedbackView(APIView):
-    def post(self, request):
-        # Get the reader_id and feedback description from the request data
-        user_id = request.data.get('user_id')
-        feedback_description = request.data.get('feedback_description')
-
-        if not user_id or not feedback_description:
-            return Response({"error": "User ID and feedback description are required"}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Create a new FeedBack record
-        try:
-            reader = Reader.objects.get(user_id=user_id)
-        except Reader.DoesNotExist:
-            return Response({"error": "Reader not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-        feedback = FeedBack.objects.create(reader_id=reader.reader_id, feedback_description=feedback_description)
-
-        # Serialize the feedback object
-        serializer = FeedBackSerializer(feedback)
-
-        # Return the serialized data as response
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
     
-#-- list uploaded_book (pagination achived)
-class UploadedBookListView(APIView):
-    def get(self, request):
-        # Get the reader_id from query parameters
-        reader_id = request.query_params.get('reader_id')
-        if not reader_id:
-            return Response({"error": "Reader ID is required"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Get the wishlist items for the given reader, ordered by `wish_list_id`
-        items = UploadedBook.objects.filter(reader_id=reader_id).order_by('-uploaded_book_id')
-
-        # Paginate the results
-        paginator = UploadedBookPagination()
-        result_page = paginator.paginate_queryset(items, request)
-
-        # Extract the book_ids from the wishlist items
-        book_ids = [item.book_id for item in result_page]
-
-        # Fetch the corresponding Book objects in the same order as book_ids
-        books = Book.objects.filter(book_id__in=book_ids).order_by(
-            Case(*[When(book_id=book_id, then=pos) for pos, book_id in enumerate(book_ids)], default=0)
-        )
-
-        # Serialize the Book objects
-        serializer = BookSerializer(books, many=True)
-
-        # Return the paginated response with serialized data
-        return paginator.get_paginated_response(serializer.data)
-    
-
-class CreateBookView(APIView):
-    def post(self, request):
-        # Extract the data from the request body
-        data = request.data
-
-        # Serialize the data using a serializer
-        serializer = BookSerializer(data=data)
-
-        if serializer.is_valid():
-            # Save the new book to the database
-            serializer.save()
-            return Response({"message": "Book created successfully"}, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+#--------------------------------------------------------------------------------------------
 
 class AddBookToWishlist(APIView):
     def post(self, request):
@@ -794,7 +709,8 @@ class AddBookToWishlist(APIView):
 
 
 
-    
+#--------------------------------------------------------------------------------------------
+   
 class RemoveBookFromWishlist(APIView):
     def post(self, request):
         book_id = request.data.get('book_id')
@@ -820,6 +736,7 @@ class RemoveBookFromWishlist(APIView):
         except WishList.DoesNotExist:
             return Response({"error": "Book not in wishlist"}, status=status.HTTP_400_BAD_REQUEST)
         
+#--------------------------------------------------------------------------------------------
 class CheckBookInWishlist(APIView):
     def get(self, request):
         book_id = request.query_params.get('book_id')
@@ -836,6 +753,107 @@ class CheckBookInWishlist(APIView):
             return Response({"in_wishlist": True}, status=status.HTTP_200_OK)
         else:
             return Response({"in_wishlist": False}, status=status.HTTP_200_OK)
+
+
+#--------------------------------------------------------------------------------------------
+
+#-- list notification (pagination achived)
+class NotificationListView(APIView):
+    def get(self, request):
+        # Get the reader_id from query parameters
+        reader_id = request.query_params.get('reader_id')
+        if not reader_id:
+            return Response({"error": "Reader ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Get the notifications for the given reader
+        notifications = Notification.objects.filter(reader_id=reader_id).order_by('-notification_id')
+
+        # Apply pagination
+        paginator = NotificationPagination()
+        result_page = paginator.paginate_queryset(notifications, request)
+
+        # Extract the notification_record from each item
+        notification_records = [item.notification_record for item in result_page]
+
+        # Return the paginated response with notification records
+        return paginator.get_paginated_response(notification_records)
+
+#--------------------------------------------------------------------------------------------
+
+#-- insert feedback
+class InsertFeedbackView(APIView):
+    def post(self, request):
+        # Get the reader_id and feedback description from the request data
+        user_id = request.data.get('user_id')
+        feedback_description = request.data.get('feedback_description')
+
+        if not user_id or not feedback_description:
+            return Response({"error": "User ID and feedback description are required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Create a new FeedBack record
+        try:
+            reader = Reader.objects.get(user_id=user_id)
+        except Reader.DoesNotExist:
+            return Response({"error": "Reader not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        feedback = FeedBack.objects.create(reader_id=reader.reader_id, feedback_description=feedback_description)
+
+        # Serialize the feedback object
+        serializer = FeedBackSerializer(feedback)
+
+        # Return the serialized data as response
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+#--------------------------------------------------------------------------------------------
+  
+#-- list uploaded_book (pagination achived)
+class UploadedBookListView(APIView):
+    def get(self, request):
+        # Get the reader_id from query parameters
+        reader_id = request.query_params.get('reader_id')
+        if not reader_id:
+            return Response({"error": "Reader ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Get the wishlist items for the given reader, ordered by `wish_list_id`
+        items = UploadedBook.objects.filter(reader_id=reader_id).order_by('-uploaded_book_id')
+
+        # Paginate the results
+        paginator = UploadedBookPagination()
+        result_page = paginator.paginate_queryset(items, request)
+
+        # Extract the book_ids from the wishlist items
+        book_ids = [item.book_id for item in result_page]
+
+        # Fetch the corresponding Book objects in the same order as book_ids
+        books = Book.objects.filter(book_id__in=book_ids).order_by(
+            Case(*[When(book_id=book_id, then=pos) for pos, book_id in enumerate(book_ids)], default=0)
+        )
+
+        # Serialize the Book objects
+        serializer = BookSerializer(books, many=True)
+
+        # Return the paginated response with serialized data
+        return paginator.get_paginated_response(serializer.data)
+    
+#--------------------------------------------------------------------------------------------
+
+class CreateBookView(APIView):
+    def post(self, request):
+        # Extract the data from the request body
+        data = request.data
+
+        # Serialize the data using a serializer
+        serializer = BookSerializer(data=data)
+
+        if serializer.is_valid():
+            # Save the new book to the database
+            serializer.save()
+            return Response({"message": "Book created successfully"}, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
 
 
         
