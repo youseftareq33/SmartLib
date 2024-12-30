@@ -66,7 +66,7 @@
                             </div> 
                         </div>
                         <div id="viewAll_wishList" class="view-all">
-                            <a href="#">View All WishList</a>
+                            <a href="/wish-listPage">View All WishList</a>
                         </div>
                     </div>
                 </div>
@@ -101,25 +101,26 @@
                             </div> 
                         </div>
                         <div id="viewAll_notification" class="view-all">
-                            <a href="#">View All Notifications</a>
+                            <a href="/notificationPage">View All Notifications</a>
                         </div>
                     </div>
                 </div>
 
                 <a class="user" id="user" href='#'><img id="img_user" src='{% static "images/user.png" %}' width='27' height='25'></a>
                 <ul class="dropdown-user" id="dropdown-user">
-                    <li onclick="handleOptionClick_user('User Profile')">
-                        <p id="user_rank">Rank: Bronze</p>
-                        <img id="img_rank" src='{% static "images/bronze_rank.png" %}' alt="img" width='25' height='25'>
+                    <li onclick="handleOptionClick_user('Rank')" class="user-rank">
+                        <p id="user_rank">Rank: Rookie</p>
+                        <img id="img_rank" src="{% static 'images/rookie_rank.png' %}" alt="img" width="25" height="25">
                     </li>
-                    <hr>
+                    <hr class="divider">
                     <li onclick="handleOptionClick_user('User Profile')">User Profile</li>
                     <li onclick="handleOptionClick_user('My Uploaded Book')">My Uploaded Book</li>
                     <li onclick="handleOptionClick_user('Wish List')">Wish List</li>
                     <li onclick="handleOptionClick_user('Notification')">Notification</li>
-                    <li onclick="handleOptionClick_user('Send FeedBack')">Send FeedBack</li>
-                    <li onclick="handleOptionClick_user('Log out')" class="logout">Log out</li>
+                    <li onclick="handleOptionClick_user('Send FeedBack')">Send Feedback</li>
+                    <li onclick="handleOptionClick_user('Log out')" class="logout">Log Out</li>
                 </ul>
+                
 
                 <div class="feedback-stack" id="feedback-stack">
                     <div class="feedback-content">

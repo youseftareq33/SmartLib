@@ -3,7 +3,7 @@
 
 let userId = -1;  
 let user_name="";
-
+let user_rank="";
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('jwt_token');
 
@@ -46,7 +46,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 .catch(error => {
                     console.error("Error fetching user name:", error);
                 });
-        } else {
+
+            fetch(`/get_reader_info?user_id=${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data) {
+                    const reader_rank = data.reader_rank;  // Assign the fetched reader_rank
+                    document.getElementById('user_rank').textContent = "Rank: " + reader_rank;
+
+                    if(reader_rank=="Rookie"){
+                        document.getElementById('img_rank').src = '/static/images/rookie_rank.png'; 
+                    }
+                    else if(reader_rank=="Bronze"){
+                        document.getElementById('img_rank').src = '/static/images/bronze_rank.png'; 
+                    }
+                    else if(reader_rank=="Silver"){
+                        document.getElementById('img_rank').src = '/static/images/silver_rank.png'; 
+                    }
+                    else if(reader_rank=="Gold"){
+                        document.getElementById('img_rank').src = '/static/images/gold_rank.png'; 
+                    }
+
+                } else {
+                    console.error("Reader not found");
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching Reader:", error);
+            });
+        } 
+        else {
             console.log("No user_id found.");
         }
 
@@ -222,7 +251,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 return response.json();
             })
             .then(data => {
-                if(data){
+                if(Array.isArray(data) && data.length === 0){
+                    empty_wishList.style.display = 'block';
+                    notEmpty_wishList.style.display = 'none';
+                }
+                else if(data){
                     empty_wishList.style.display = 'none';
                     notEmpty_wishList.style.display = 'block';
 
@@ -358,7 +391,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return response.json();
         })
         .then(data => {
-            if(data){
+            if(Array.isArray(data) && data.length === 0){
+                empty_notification.style.display = 'block';
+                notEmpty_notification.style.display = 'none';
+            }
+            else if(data){
                 empty_notification.style.display = 'none';
                 notEmpty_notification.style.display = 'block';
 
@@ -480,9 +517,29 @@ dropdown_user.addEventListener('mouseleave', (event) => {
 
 // Function to handle option click in the dropdown
 function handleOptionClick_user(option) {
-    if (option === 'Send FeedBack') {
+    if (option === 'Rank') { 
+        window.location.href = '/rankPage';
+    }
+    else if(option === 'User Profile'){
+
+    }
+    else if(option === 'My Uploaded Book'){
+        window.location.href = '/myUploadedBookPage';
+    }
+    else if(option === 'Wish List'){
+        window.location.href = '/wish-listPage';
+    }
+    else if(option === 'Notification'){
+        window.location.href = '/notificationPage'; 
+    }
+    else if(option === 'Send FeedBack'){
         document.getElementById("feedback-stack").style.display = "flex";
     }
+    else if(option === 'Log out'){
+        localStorage.removeItem('jwt_token'); 
+        window.location.href = '/login'; 
+    }
+
 }
 
 document.getElementById("closeBtn").onclick = function() {

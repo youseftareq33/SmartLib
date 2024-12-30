@@ -24,7 +24,7 @@ class User(models.Model):
 class Reader(models.Model):
     reader_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='user_id')
-    reader_rank = models.CharField(max_length=20, default='Bronze')
+    reader_rank = models.CharField(max_length=20, default='Rookie')
     reader_point = models.IntegerField(default=0)
     is_first_time = models.BooleanField(default=False)
     class Meta:

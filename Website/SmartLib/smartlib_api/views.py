@@ -72,6 +72,18 @@ def resetPasswordPage(request, email):
 
 def homePage(request):
     return render(request, '6_home_page.html')
+
+def RankPage(request):
+    return render(request, '7_gamefication_page.html')
+
+def WishListPage(request):
+    return render(request, '8_wishlist_page.html')
+
+def NotificationPage(request):
+    return render(request, '9_notification_page.html')
+
+def MyUploadedBookPage(request):
+    return render(request, '10_myUploadedBook_page.html')
 #--------------------------------------------------------------------------------------------
 
 
@@ -361,7 +373,22 @@ class UserNameListView(APIView):
         except User.DoesNotExist:
             return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
+#--------------------------------------------------------------------------------------------
 
+#-- get reader
+class ReaderInfoListView(APIView):
+    def get(self, request):
+
+        user_id = request.query_params.get('user_id')
+
+        # Retrieve the reader associated with the user
+        try:
+            reader = Reader.objects.get(user_id=user_id)
+            serializer = ReaderSerializer(reader)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Reader.DoesNotExist:
+            return Response({"error": "Reader not found"}, status=status.HTTP_400_BAD_REQUEST)
+        
 #--------------------------------------------------------------------------------------------
 
 #-- list book (pagination achived)
@@ -378,7 +405,7 @@ class BookListView(APIView):
 #-- list most readed book (pagination achived)
 class MostReaded_BookListView(APIView):
     def get(self, request):
-        books = Book.objects.order_by('-book_reading_counter')
+        books = Book.objects.filter(status=Book.Status.ACCEPTED).order_by('-book_reading_counter')
         paginator = BookPagination()
         result_page = paginator.paginate_queryset(books, request)
         serializer = BookSerializer(result_page, many=True)
@@ -389,7 +416,7 @@ class MostReaded_BookListView(APIView):
 #-- list last uploaded book (pagination achived)
 class LastUploaded_BookListView(APIView):
     def get(self, request):
-        books = Book.objects.order_by('-book_uploaded_date')
+        books = Book.objects.filter(status=Book.Status.ACCEPTED).order_by('-book_uploaded_date')
         paginator = BookPagination()
         result_page = paginator.paginate_queryset(books, request)
         serializer = BookSerializer(result_page, many=True)
@@ -445,7 +472,7 @@ class AddRatingAndReviewView(APIView):
 #-- list Most Rating book (pagination achived)
 class MostRating_BookListView(APIView):
     def get(self, request):
-        books = Book.objects.order_by('-book_rating_avg')
+        books = Book.objects.filter(status=Book.Status.ACCEPTED).order_by('-book_rating_avg')
         paginator = BookPagination()
         result_page = paginator.paginate_queryset(books, request)
         serializer = BookSerializer(result_page, many=True)
@@ -463,7 +490,7 @@ class BookSearchView(APIView):
         min_rating = request.query_params.get('min_rating', None)
 
         # Base queryset, only filter if search query is provided
-        books = Book.objects.all()
+        books = Book.objects.filter(status=Book.Status.ACCEPTED)
         if search_query:
             books = books.filter(book_name__icontains=search_query)
 
@@ -507,8 +534,7 @@ class MostReadedPreferences_BookListView(APIView):
         user_preferences = Preferences.objects.filter(reader__user__user_id=user_id).values_list('category', flat=True)
         
         # Filter books based on the user's preferred categories
-        books = Book.objects.filter(category__in=user_preferences).order_by('-book_reading_counter')
-        
+        books = Book.objects.filter(category__in=user_preferences, status=Book.Status.ACCEPTED).order_by('-book_reading_counter')
         # Apply pagination
         paginator = BookPagination()
         result_page = paginator.paginate_queryset(books, request)
@@ -529,7 +555,7 @@ class MostRatingPreferences_BookListView(APIView):
         user_preferences = Preferences.objects.filter(reader__user__user_id=user_id).values_list('category', flat=True)
         
         # Filter books based on the user's preferred categories and order by rating
-        books = Book.objects.filter(category__in=user_preferences).order_by('-book_rating_avg')
+        books = Book.objects.filter(category__in=user_preferences, status=Book.Status.ACCEPTED).order_by('-book_rating_avg')
         
         # Apply pagination
         paginator = BookPagination()
@@ -551,7 +577,7 @@ class LastUploadedPreferences_BookListView(APIView):
         user_preferences = Preferences.objects.filter(reader__user__user_id=user_id).values_list('category', flat=True)
         
         # Filter books based on the user's preferred categories and order by upload date
-        books = Book.objects.filter(category__in=user_preferences).order_by('-book_uploaded_date')
+        books = Book.objects.filter(category__in=user_preferences, status=Book.Status.ACCEPTED).order_by('-book_uploaded_date')
         
         # Apply pagination
         paginator = BookPagination()
@@ -571,7 +597,7 @@ class BookContinueReadingListView(APIView):
             return Response({"error": "User ID is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Filter books in the BookContinueReading table for the specified user and order in reverse
-        continue_reading_books = Book.objects.filter(bookcontinuereading__reader__user__user_id=user_id).order_by('-bookcontinuereading__continue_reading_id')
+        continue_reading_books = Book.objects.filter(bookcontinuereading__reader__user__user_id=user_id, status=Book.Status.ACCEPTED).order_by('-bookcontinuereading__continue_reading_id')
 
         # Apply pagination
         paginator = BookPagination()
@@ -642,12 +668,20 @@ class LastThreeNotificationListView(APIView):
 class WishListListView(APIView):
     def get(self, request):
         # Get the reader_id from query parameters
-        reader_id = request.query_params.get('reader_id')
-        if not reader_id:
-            return Response({"error": "Reader ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+        user_id = request.query_params.get('user_id')
+
+        # Validate book_id and user_id
+        if not user_id:
+            return Response({"error": "User ID not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Retrieve the reader associated with the user
+        try:
+            reader = Reader.objects.get(user_id=user_id)
+        except Reader.DoesNotExist:
+            return Response({"error": "Reader not found"}, status=status.HTTP_404_NOT_FOUND)
 
         # Get the wishlist items for the given reader, ordered by `wish_list_id`
-        items = WishList.objects.filter(reader_id=reader_id).order_by('-wish_list_id')
+        items = WishList.objects.filter(reader_id=reader.reader_id).order_by('-wish_list_id')
 
         # Paginate the results
         paginator = WishListPagination()
@@ -761,22 +795,29 @@ class CheckBookInWishlist(APIView):
 class NotificationListView(APIView):
     def get(self, request):
         # Get the reader_id from query parameters
-        reader_id = request.query_params.get('reader_id')
-        if not reader_id:
-            return Response({"error": "Reader ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+        user_id = request.query_params.get('user_id')
+
+        # Validate book_id and user_id
+        if not user_id:
+            return Response({"error": "User ID not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Retrieve the reader associated with the user
+        try:
+            reader = Reader.objects.get(user_id=user_id)
+        except Reader.DoesNotExist:
+            return Response({"error": "Reader not found"}, status=status.HTTP_404_NOT_FOUND)
 
         # Get the notifications for the given reader
-        notifications = Notification.objects.filter(reader_id=reader_id).order_by('-notification_id')
+        notifications = Notification.objects.filter(reader_id=reader.reader_id).order_by('-notification_id')
 
         # Apply pagination
         paginator = NotificationPagination()
         result_page = paginator.paginate_queryset(notifications, request)
 
-        # Extract the notification_record from each item
-        notification_records = [item.notification_record for item in result_page]
+        serializer = NotificationListSerializer(result_page, many=True)
 
-        # Return the paginated response with notification records
-        return paginator.get_paginated_response(notification_records)
+        # Return the paginated response with serialized data
+        return paginator.get_paginated_response(serializer.data)
 
 #--------------------------------------------------------------------------------------------
 
@@ -810,12 +851,20 @@ class InsertFeedbackView(APIView):
 class UploadedBookListView(APIView):
     def get(self, request):
         # Get the reader_id from query parameters
-        reader_id = request.query_params.get('reader_id')
-        if not reader_id:
-            return Response({"error": "Reader ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+        user_id = request.query_params.get('user_id')
+
+        # Validate book_id and user_id
+        if not user_id:
+            return Response({"error": "User ID not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Retrieve the reader associated with the user
+        try:
+            reader = Reader.objects.get(user_id=user_id)
+        except Reader.DoesNotExist:
+            return Response({"error": "Reader not found"}, status=status.HTTP_404_NOT_FOUND)
 
         # Get the wishlist items for the given reader, ordered by `wish_list_id`
-        items = UploadedBook.objects.filter(reader_id=reader_id).order_by('-uploaded_book_id')
+        items = UploadedBook.objects.filter(reader_id=reader.reader_id).order_by('-uploaded_book_id')
 
         # Paginate the results
         paginator = UploadedBookPagination()
@@ -836,7 +885,41 @@ class UploadedBookListView(APIView):
         return paginator.get_paginated_response(serializer.data)
     
 #--------------------------------------------------------------------------------------------
+#-- remove uploaded_book (pagination achived)
 
+class RemoveUploadedBookView(APIView):
+    def delete(self, request):
+        # Get the book_id and user_id from query parameters
+        book_id = request.query_params.get('book_id')
+        user_id = request.query_params.get('user_id')
+
+        # Validate book_id and user_id
+        if not book_id or not user_id:
+            return Response({"error": "Both book_id and user_id are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Retrieve the reader associated with the user
+        try:
+            reader = Reader.objects.get(user_id=user_id)
+        except Reader.DoesNotExist:
+            return Response({"error": "Reader not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Try to find the UploadedBook record
+        try:
+            uploaded_book = UploadedBook.objects.get(book_id=book_id, reader_id=reader.reader_id)
+            book=Book.objects.get(book_id=book_id)
+
+        except UploadedBook.DoesNotExist:
+            return Response({"error": "UploadedBook record not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Delete the record
+        uploaded_book.delete()
+        book.delete()
+
+        # Return a success response
+        return Response({"message": "Book successfully removed from uploaded books"}, status=status.HTTP_200_OK)
+
+#--------------------------------------------------------------------------------------------
+#-- list uploaded_book (pagination achived)
 class CreateBookView(APIView):
     def post(self, request):
         # Extract the data from the request body
@@ -853,8 +936,30 @@ class CreateBookView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
+#--------------------------------------------------------------------------------------------
 
+#-- gamefication record (pagination achived)
+class GamificationRecordListView(APIView):
+    def get(self, request):
+        # Get the user_id from query parameters
+        user_id = request.query_params.get('user_id')
+        if not user_id:
+            return Response({"error": "User ID is required"}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Retrieve the reader associated with the user
+        try:
+            reader = Reader.objects.get(user_id=user_id)
+        except Reader.DoesNotExist:
+            return Response({"error": "Reader not found"}, status=status.HTTP_404_NOT_FOUND)
 
+        # Filter records for the specified user and order by date_and_time (most recent first)
+        gamification_records = Gamification_Record.objects.filter(reader_id=reader.reader_id).order_by('-date_and_time')
+
+        # Apply pagination
+        paginator = GameficationPagination()
+        result_page = paginator.paginate_queryset(gamification_records, request)
+        serializer = GameficationSerializer(result_page, many=True)  # Use the correct serializer here
+
+        return paginator.get_paginated_response(serializer.data)
         
 

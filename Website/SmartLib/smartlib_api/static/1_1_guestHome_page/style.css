@@ -71,6 +71,7 @@ header{
     display: none;
     position: absolute;
     height: 200px;
+    width: 130px;
     top: 64px;
     left: 106px;
     background-color: #fff;
@@ -84,6 +85,7 @@ header{
     max-height: 280px;
     overflow-y: auto;
     border-radius: 10px;
+    font-family: 'Arial', sans-serif;
 }
 
 .left-header-container .dropdown-categories li {
@@ -95,8 +97,8 @@ header{
 }
 
 .left-header-container .dropdown-categories li:hover {
-    color: #FFD700;
-    background-color: #fef7f7;
+    background-color: #f0f0f0;
+    color: #007bff;
 }
 
 .left-header-container .dropdown-categories::-webkit-scrollbar {

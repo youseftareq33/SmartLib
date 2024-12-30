@@ -42,3 +42,8 @@ class FeedBackSerializer(serializers.ModelSerializer):
         model = FeedBack
         fields = '__all__'
 
+class GameficationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Gamification_Record
+        fields = '__all__'
+
