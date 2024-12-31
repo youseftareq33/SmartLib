@@ -505,7 +505,7 @@ function handleOptionClick_user(option) {
         window.location.href = '/rankPage';
     }
     else if(option === 'User Profile'){
-
+        window.location.href = '/accountSettingsPage';
     }
     else if(option === 'My Uploaded Book'){
         window.location.href = '/myUploadedBookPage';
@@ -742,30 +742,53 @@ const removeImgs = document.querySelectorAll('[id^="favorite_img"] img');
 
 removeButtons.forEach((removeButtons, index) => {
     removeButtons.addEventListener('click', () => {
-        // Get the book_id from currentData.results array
-        const book = currentData.results[index]; // Access the book object based on the button clicked
-        const bookId = book.book_id; // Get the book_id from the currentData
 
-        fetch(`/remove_uploaded_book/?book_id=${bookId}&user_id=${userId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
-        .then(response => {
-            if (!response.ok) {
-                console.error(`Error: ${response.status} - ${response.statusText}`);
-                throw new Error('Failed to delete book');
+        document.getElementById("alert-stack").style.display = "flex";
+
+        document.getElementById("closeBtn-alert").onclick = function() {
+            document.getElementById("alert-stack").style.display = "none";
+        }
+        
+        window.onclick = function(event) {
+            if (event.target === document.getElementById("alert-stack")) {
+                document.getElementById("alert-stack").style.display = "none";
             }
-            return response.json();
-        })
-        .then(data => {
-            console.log(data.message || 'Book deleted successfully');
-            updateBooks();
-        })
-        .catch(error => {
-            console.error('Error removing book:', error);
-        });
+        }
+        
+        document.getElementById("alert_delete").onclick = function() {
+            // Get the book_id from currentData.results array
+            const book = currentData.results[index]; // Access the book object based on the button clicked
+            const bookId = book.book_id; // Get the book_id from the currentData
+
+            fetch(`/remove_uploaded_book/?book_id=${bookId}&user_id=${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    console.error(`Error: ${response.status} - ${response.statusText}`);
+                    throw new Error('Failed to delete book');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data.message || 'Book deleted successfully');
+                document.getElementById("alert-stack").style.display = "none";
+                updateBooks();
+            })
+            .catch(error => {
+                console.error('Error removing book:', error);
+            });
+        
+        }
+
+        document.getElementById("alert_cancel").onclick = function() {
+            document.getElementById("alert-stack").style.display = "none";
+        }
+
+        
         
     });
 });

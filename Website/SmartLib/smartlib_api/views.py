@@ -84,6 +84,9 @@ def NotificationPage(request):
 
 def MyUploadedBookPage(request):
     return render(request, '10_myUploadedBook_page.html')
+
+def AccountSettingsPage(request):
+    return render(request, '11_accountSettings_page.html')
 #--------------------------------------------------------------------------------------------
 
 
@@ -350,6 +353,32 @@ class reset_password(APIView):
             return redirect('loginPage')      
         except User.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+        
+
+class UserChangePasswordView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        curr_password = request.data.get('curr_password')
+        new_password = request.data.get('new_password')
+
+        try:
+            # Retrieve the user by email
+            user = User.objects.get(email=email)
+
+            # Verify the current password using bcrypt
+            if not bcrypt.checkpw(curr_password.encode('utf-8'), user.user_password.encode('utf-8')):
+                return Response({"error": "Incorrect Current password!"}, status=status.HTTP_401_UNAUTHORIZED)
+
+            # Hash the password using bcrypt and verify hashing
+            hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+
+            user.user_password = hashed_password
+            user.save()
+
+            return Response({"message": "Password updated successfully!"}, status=status.HTTP_200_OK)
+
+        except User.DoesNotExist:
+            raise AuthenticationFailed("User not found!", status=status.HTTP_404_NOT_FOUND)
 #--------------------------------------------------------------------------------------------
 
 
@@ -369,7 +398,8 @@ class UserNameListView(APIView):
             # Fetch the user by ID
             user = User.objects.get(user_id=user_id)
             # Return the user_name
-            return Response({"user_name": user.user_name}, status=status.HTTP_200_OK)
+            serializer = UserSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -963,3 +993,24 @@ class GamificationRecordListView(APIView):
         return paginator.get_paginated_response(serializer.data)
         
 
+#--------------------------------------------------------------------------------------------
+
+class DeleteUser(APIView):
+    def put(self, request):
+        user_id = request.data.get('user_id')
+
+        if not user_id:
+            return Response({"error": "User ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Use `user_id` since that's the field available in your model
+            user = User.objects.get(user_id=user_id)  # Use `user_id` instead of `id`
+            user.is_active = False  # Deactivate the user
+            user.user_name = f"{user_id}_Deleted-Account"  # Rename the user to indicate it's deleted
+            user.save()  # Save the changes
+
+            return Response({"message": "User deactivated successfully"}, status=status.HTTP_200_OK)
+
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
+        

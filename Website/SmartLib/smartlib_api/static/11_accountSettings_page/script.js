@@ -4,6 +4,7 @@
 let userId = -1;  
 let user_name="";
 let user_rank="";
+let user_email="";
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('jwt_token');
 
@@ -31,14 +32,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Check if user_id is available
         if (userId !== -1) {
-            // Make an API call to fetch the user_name using user_id
             fetch(`/get_username/${userId}/`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.user_name) {
-                        const user_name = data.user_name;  // Assign the fetched user_name
-                        document.getElementById('hello_message').textContent = "Hello, " + user_name;
-                        console.log("User Name:", user_name);  // You can use the user_name here
+                        let user_name = data.user_name;  // Assign the fetched user_name
+                        if(user_name.length>12){
+                            user_name = user_name.substring(0, 12) + "...";
+                        }
+                        document.getElementById('user_name').textContent = user_name;
+
+                        user_email = data.email;
+                        document.getElementById('email').value = user_email;
                     } else {
                         console.error("User name not found");
                     }
@@ -594,224 +599,176 @@ document.getElementById("sendFeedback").onclick = function() {
     document.getElementById("feedbackText").value = '';
 }
 
-//---------------------------------------------------------------------------------------
+//-----------------------------------------------------
+// Option li
 
-// functionality for continue reading book
+const links = document.querySelectorAll('.nav-link');
 
-let currentData = null; 
+links.forEach(link => {
+    link.addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent default behavior of anchor links
 
-document.addEventListener('DOMContentLoaded', () => {
-    
-    const book_prev = document.getElementById('prev');
-    const book_next = document.getElementById('next');
+        // Remove 'active' class from all links
+        links.forEach(l => l.classList.remove('active'));
 
-    const book_1 = document.getElementById('book_item_1');
-    const book_2 = document.getElementById('book_item_2');
-    const book_3 = document.getElementById('book_item_3');
-    const book_4 = document.getElementById('book_item_4');
-    const book_5 = document.getElementById('book_item_5');
-    const book_6 = document.getElementById('book_item_6');
-    const book_7 = document.getElementById('book_item_7');
-    const book_8 = document.getElementById('book_item_8');
+        if(this.id === "security"){
+            this.classList.add('active');
+            document.querySelector(".security").style.display = "flex";
+            document.querySelector(".preferences").style.display = "none";
+        }
+        else if(this.id === "preferences"){
+            this.classList.add('active');
+            document.querySelector(".security").style.display = "none";
+            document.querySelector(".preferences").style.display = "flex";
+        }
+        else if(this.id === "delete") {
+            this.classList.add('active');
+            document.getElementById("alert-stack").style.display = "flex";
 
-    // Initially hide all book items
-    book_1.style.display = 'none';
-    book_2.style.display = 'none';
-    book_3.style.display = 'none';
-    book_4.style.display = 'none';
-    book_5.style.display = 'none';
-    book_6.style.display = 'none';
-    book_7.style.display = 'none';
-    book_8.style.display = 'none';
-
-    // Fetch initial data when page loads
-    fetch(`/getWishList_ListView?user_id=${userId}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to fetch books');
+            document.getElementById("closeBtn-alert").onclick = function() {
+                document.getElementById("alert-stack").style.display = "none";
             }
-            return response.json();
-        })
-        .then(data => {
-            currentData = data; // Store the fetched data
-            updateBookDetails(data); // Update the book details initially
-
-            // Event listener for "Previous" button
-            book_prev.addEventListener('click', (event) => {
-                event.preventDefault(); // Prevent the default anchor behavior
-                if (currentData.previous) {
-                    curr_url_continue=currentData.previous;
-                    loadBooks(curr_url_continue); 
+            
+            window.onclick = function(event) {
+                if (event.target === document.getElementById("alert-stack")) {
+                    document.getElementById("alert-stack").style.display = "none";
                 }
-            });
-
-            // Event listener for "Next" button
-            book_next.addEventListener('click', (event) => {
-                event.preventDefault(); 
-                if (currentData.next) {
-                    curr_url_continue=currentData.next;
-                    loadBooks(curr_url_continue); 
-                }
-            });
-        })
-        .catch(error => {
-            console.error('Error fetching books:', error);
-        });
-});
-
-// Function to load books based on the next or previous URL
-function loadBooks(url) {
-    fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to load books');
             }
-            return response.json();
-        })
-        .then(data => {
-            currentData = data; // Update the current data
-            updateBookDetails(data); // Update the book details
-        })
-        .catch(error => {
-            console.error('Error loading books:', error);
-        });
-}
+            
+            document.getElementById("alert_delete").onclick = function() {
 
-// Function to update book details and pagination buttons
-function updateBookDetails(data) {
-    const book_prev = document.querySelector('#prev img');
-    const book_next = document.querySelector('#next img');
-
-    const book_1 = document.getElementById('book_item_1');
-    const book_2 = document.getElementById('book_item_2');
-    const book_3 = document.getElementById('book_item_3');
-    const book_4 = document.getElementById('book_item_4');
-    const book_5 = document.getElementById('book_item_5');
-    const book_6 = document.getElementById('book_item_6');
-    const book_7 = document.getElementById('book_item_7');
-    const book_8 = document.getElementById('book_item_8');
-
-    // Initially hide all book items
-    book_1.style.display = 'none';
-    book_2.style.display = 'none';
-    book_3.style.display = 'none';
-    book_4.style.display = 'none';
-    book_5.style.display = 'none';
-    book_6.style.display = 'none';
-    book_7.style.display = 'none';
-    book_8.style.display = 'none';
-
-    // Show or hide pagination buttons based on available data
-    if (data.previous == null && data.next == null) {
-        book_prev.src = '/static/images/prev_page_empty.png';
-        book_next.src = '/static/images/next_page_empty.png';
-    } else if (data.previous == null && data.next != null) {
-        book_prev.src = '/static/images/prev_page_empty.png';
-        book_next.src = '/static/images/next_page.png';
-    } else if (data.previous != null && data.next == null) {
-        book_prev.src = '/static/images/prev_page.png';
-        book_next.src = '/static/images/next_page_empty.png';
-    } else {
-        book_prev.src = '/static/images/prev_page.png';
-        book_next.src = '/static/images/next_page.png';
-    }
-
-    // Update the book details dynamically
-    data.results.forEach((book, index) => {
-        const bookName = document.getElementById(`book_name_${index + 1}`);
-        const bookAuthor = document.getElementById(`book_author_${index + 1}`);
-        const bookCategory = document.getElementById(`book_category_${index + 1}`);
-        const bookRating = document.getElementById(`book_rating_${index + 1}`);
-        const bookImage = document.getElementById(`book_image_${index + 1}`);
-        const bookItem = document.getElementById(`book_item_${index + 1}`);
-        const bookFavImage = document.getElementById(`book_fav_${index + 1}`);
-
-        // If there is data for the book, display the book item
-        if (book) {
-            bookItem.style.display = 'block'; // Make the book item visible
-
-            // Update book details
-            bookName.textContent = book.book_name || 'No Name';
-            bookAuthor.textContent = `Author: ${book.book_author || 'No Author'}`;
-            bookCategory.textContent = `Category: ${book.book_type || 'No Category'}`;
-            bookRating.textContent = `Rating: ${'⭐'.repeat(book.book_rating_avg || 0)}`;
-
-            // Update the image (if available)
-            if (book.book_image) {
-                bookImage.src = book.book_image;
-            }
-
-            // Check if the book is in the wishlist
-            fetch(`/check-book-in-wishlist/?book_id=${book.book_id}&user_id=${userId}`)
-                .then(response => response.json())
-                .then(data => {
-                    // If the book is in the wishlist, update the favorite image
-                    if (data.in_wishlist) {
-                        bookFavImage.src = '/static/images/fav_clicked.png'; 
-                    } else {
-                        bookFavImage.src = '/static/images/fav_not-click.png';
+                fetch('/delete-user-api', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: userId
+                    }),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        console.error(`Error: ${response.status} - ${response.statusText}`);
+                        throw new Error('Failed to delete User');
                     }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data.message || 'User deleted successfully');
+                    document.getElementById("alert-stack").style.display = "none";
+                    localStorage.removeItem('jwt_token'); 
+                    window.location.href = '/login'; 
                 })
                 .catch(error => {
-                    console.error('Error checking wishlist:', error);
+                    console.error('Error removing User:', error);
                 });
-        } else {
-            // If no data for the book, hide the book item
-            bookItem.style.display = 'none';
+            
+            }
+
+            document.getElementById("alert_cancel").onclick = function() {
+                document.getElementById("alert-stack").style.display = "none";
+            }
         }
-    });
-}
-
-//---------------------------------------------------------------------------------------
-
-// Functionality for "fav_btn" continue reading
-const favButtons_continue = document.querySelectorAll('[id^="favorite-btn"]'); 
-const favImgs_continue = document.querySelectorAll('[id^="favorite_img"] img');
-
-favButtons_continue.forEach((favButton, index) => {
-    favButton.addEventListener('click', () => {
-        const favImg = favImgs_continue[index]; // Get the corresponding image
         
-        // Get the book_id from currentData.results array
-        const book = currentData.results[index]; // Access the book object based on the button clicked
-        const bookId = book.book_id; // Get the book_id from the currentData
-
-
-        if (favImg.src.includes('fav_not-click.png')) {
-            // Add to wishlist
-            fetch('/add-to-wishlist/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ book_id: bookId, user_id: userId }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message) {
-                    favImg.src = '/static/images/fav_clicked.png'; // Change image to clicked state
-                } else {
-                    alert(data.error);
-                }
-            });
-        } else {
-            // Remove from wishlist
-            fetch('/remove-from-wishlist/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ book_id: bookId, user_id: userId }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message) {
-                    favImg.src = '/static/images/fav_not-click.png'; // Change image back to not clicked state
-                } else {
-                    alert(data.error);
-                }
-            });
-        }
-
+        
     });
+});
+
+
+//-----------------------------------------------------
+// security:
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+changePass_btn=document.getElementById('btn_change_pass');
+const current_pass = document.getElementById("curr_password");
+const new_pass = document.getElementById("new_password");
+const error_msg=document.getElementById('error');
+let valid_password_strong=false;
+
+changePass_btn.addEventListener('click', async (event) => {
+    event.preventDefault();
+    if(current_pass.value=== "" || new_pass.value=== ""){
+        error_msg.textContent = "Please fill all fields.";
+        error_msg.style.color = "red";
+        error_msg.style.display = 'block';
+    }
+    else if(valid_password_strong){
+        const response = await fetch('/change-password-api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: user_email,
+                curr_password: current_pass.value,
+                new_password: new_pass.value
+            })
+        });
+    
+        if (!response.ok) {
+            const data = await response.json();
+            error_msg.textContent = data.error || "An unexpected error occurred.";
+            error_msg.style.color = "red";
+            error_msg.style.display = "block";
+        } else {
+            error_msg.textContent = "Password updated successfully!";
+            error_msg.style.color = "green";
+            error_msg.style.display = "block";
+
+            // Hide the message after 3 seconds
+            setTimeout(() => {
+                error_msg.style.display = "none";
+                current_pass.value="";
+                new_pass.value="";
+            }, 2000);
+        }
+    }
+    else{
+        error_msg.textContent = "Use a strong password for better security.";
+        error_msg.style.color = "red";
+        error_msg.style.display = 'block';
+    }
+
+});
+
+
+new_pass.addEventListener("input", updatePasswordStrength);
+
+// Function to display password strength feedback
+function updatePasswordStrength() {
+    const password = new_pass.value;
+
+    // Check password strength using zxcvbn
+    const strength = zxcvbn(password);
+
+    // Update feedback based on the score
+    switch (strength.score) {
+        case 0:
+            error_msg.style.display = 'block';
+            error_msg.textContent = "Very Weak";
+            error_msg.style.color = "red";
+            valid_password_strong=false;
+            break;
+        case 1:
+            error_msg.style.display = 'block';
+            error_msg.textContent = "Weak";
+            error_msg.style.color = "orange";
+            valid_password_strong=false;
+            break;
+        case 2:
+            error_msg.style.display = 'block';
+            error_msg.textContent = "Strong";
+            error_msg.style.color = "yellow";
+            valid_password_strong=false;
+            break;
+        case 3:
+            error_msg.style.display = 'block';
+            error_msg.textContent = "Very Strong";
+            error_msg.style.color = "darkgreen";
+            valid_password_strong=true;
+            break;
+    }
+}
 });

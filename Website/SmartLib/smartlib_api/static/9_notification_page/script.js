@@ -500,7 +500,7 @@ function handleOptionClick_user(option) {
         window.location.href = '/rankPage';
     }
     else if(option === 'User Profile'){
-
+        window.location.href = '/accountSettingsPage';
     }
     else if(option === 'My Uploaded Book'){
         window.location.href = '/myUploadedBookPage';

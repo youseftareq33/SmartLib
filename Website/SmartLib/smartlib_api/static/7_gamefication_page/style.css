@@ -388,7 +388,7 @@ header{
 .right-header-container .feedback-stack .feedback-content h2 {
     margin-bottom: 20px;
     font-size: 24px;
-    text-align: center;
+    text-align: left;
 }
 
 .right-header-container .feedback-stack .feedback-content textarea {

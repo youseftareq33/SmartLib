@@ -7,8 +7,9 @@
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
         {% load static %}
-        <link rel="stylesheet" href="{% static '10_myUploadedBook_page/style.css' %}">
+        <link rel="stylesheet" href="{% static '11_accountSettings_page/style.css' %}">
         <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}" sizes="32x32">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js"></script>
         <title>SmartLib-my_UploadedBook Page</title>
     </head>
 
@@ -138,20 +139,11 @@
         <!-- Main -->
          <main>
 
-            <!-- Top -->
-            <div class="top_main_container" id="top_main_container">
-                <h1>My Uploaded Book</h1>
-                <div class="search-container">
-                    <button>Upload Book</button>
-                    
-                </div>
-            </div>
-
             <div id="alert-stack" class="alert-stack">
                 <div class="alert-content">
                     <span class="close-btn-alert" id="closeBtn-alert">&times;</span>
-                    <h2>Delete My Book</h2>
-                    <p>Are you sure you want to delete this book? Once deleted, it cannot be restored from this library.</p>
+                    <h2>Delete My Account</h2>
+                    <p>Are you sure you want to delete your Account? Once deleted, it cannot be restored.</p>
                     <div class="alert_buttons">
                         <button class="alert_cancel" id="alert_cancel">Cancel</button>
                         <button class="alert_delete" id="alert_delete">Delete</button>
@@ -159,147 +151,57 @@
                 </div>
             </div>
 
-            <!-- Center -->
-            <div class="center_main_container" id="center_main_container">
-                <div class="book-list-container" id="book-list-container">
-
-                    <!-- first row-->
-
-                    <!-- Book 1 -->
-                    <div class="book-item" id="book_item_1">
-                        <div id="favorite-btn" class="favorite-btn"> 
-                            <a id="favorite_img" class="favorite_img">
-                                <img id="book_fav_1" class="favorite_img" src='{% static "images/remove.png" %}' alt="favorite">
-                            </a>
-                        </div>
-                        <img id="book_image_1" src='{% static "images/book.png" %}' alt="Book Cover" class="book-cover">
-                        <div class="book-details">
-                            <h3 id="book_name_1">Book test</h3>
-                            <p id="book_author_1">Author: null..</p>
-                            <p id="book_category_1">Category: null..</p>
-                            <p id="book_status_1">Status: null..</p>
-                        </div>
+            <div class="container">
+                <div class="start">
+                    <div class="profile-section">
+                        <img src="{% static 'images/user_pic.png' %}" alt="Profile Image">
+                        <span id="user_name" class="profile-name">null</span>
                     </div>
-
-                    <!-- Book 2 -->
-                    <div class="book-item" id="book_item_2">
-                        <div id="favorite-btn" class="favorite-btn"> 
-                            <a id="favorite_img" class="favorite_img">
-                                <img id="book_fav_2" class="favorite_img" src='{% static "images/remove.png" %}' alt="favorite">
-                            </a>
-                        </div>
-                        <img id="book_image_2" src='{% static "images/book.png" %}' alt="Book Cover" class="book-cover">
-                        <div class="book-details">
-                            <h3 id="book_name_2">Book test</h3>
-                            <p id="book_author_2">Author: null..</p>
-                            <p id="book_category_2">Category: null..</p>
-                            <p id="book_status_2">Status: null..</p>
-                        </div>
-                    </div>
-
-                    <div class="book-item" id="book_item_3">
-                        <div id="favorite-btn" class="favorite-btn">
-                            <a id="favorite_img" class="favorite_img">
-                                <img id="book_fav_3" class="favorite_img" src="{% static 'images/remove.png' %}" alt="favorite">
-                            </a>
-                        </div>
-                        <img id="book_image_3" src="{% static 'images/book.png' %}" alt="Book Cover" class="book-cover">
-                        <div class="book-details">
-                            <h3 id="book_name_3">Book test</h3>
-                            <p id="book_author_3">Author: null..</p>
-                            <p id="book_category_3">Category: null..</p>
-                            <p id="book_status_3">Status: null..</p>
-                        </div>
-                    </div>
-
-                    <div class="book-item" id="book_item_4">
-                        <div id="favorite-btn" class="favorite-btn">
-                            <a id="favorite_img" class="favorite_img">
-                                <img id="book_fav_4" class="favorite_img" src="{% static 'images/remove.png' %}" alt="favorite">
-                            </a>
-                        </div>
-                        <img id="book_image_4" src="{% static 'images/book.png' %}" alt="Book Cover" class="book-cover">
-                        <div class="book-details">
-                            <h3 id="book_name_4">Book test</h3>
-                            <p id="book_author_4">Author: null..</p>
-                            <p id="book_category_4">Category: null..</p>
-                            <p id="book_status_4">Status: null..</p>
-                        </div>
-                    </div>
-
-                    <!-- second row-->
-                    <div class="book-item" id="book_item_5">
-                        <div id="favorite-btn" class="favorite-btn">
-                            <a id="favorite_img" class="favorite_img">
-                                <img id="book_fav_5" class="favorite_img" src="{% static 'images/remove.png' %}" alt="favorite">
-                            </a>
-                        </div>
-                        <img id="book_image_5" src="{% static 'images/book.png' %}" alt="Book Cover" class="book-cover">
-                        <div class="book-details">
-                            <h3 id="book_name_5">Book test</h3>
-                            <p id="book_author_5">Author: null..</p>
-                            <p id="book_category_5">Category: null..</p>
-                            <p id="book_status_5">Status: null..</p>
-                        </div>
-                    </div>
-
-                    <div class="book-item" id="book_item_6">
-                        <div id="favorite-btn" class="favorite-btn">
-                            <a id="favorite_img" class="favorite_img">
-                                <img id="book_fav_6" class="favorite_img" src="{% static 'images/remove.png' %}" alt="favorite">
-                            </a>
-                        </div>
-                        <img id="book_image_6" src="{% static 'images/book.png' %}" alt="Book Cover" class="book-cover">
-                        <div class="book-details">
-                            <h3 id="book_name_6">Book test</h3>
-                            <p id="book_author_6">Author: null..</p>
-                            <p id="book_category_6">Category: null..</p>
-                            <p id="book_status_6">Status: null..</p>
-                        </div>
-                    </div>
-
-                    <div class="book-item" id="book_item_7">
-                        <div id="favorite-btn" class="favorite-btn">
-                            <a id="favorite_img" class="favorite_img">
-                                <img id="book_fav_7" class="favorite_img" src="{% static 'images/remove.png' %}" alt="favorite">
-                            </a>
-                        </div>
-                        <img id="book_image_7" src="{% static 'images/book.png' %}" alt="Book Cover" class="book-cover">
-                        <div class="book-details">
-                            <h3 id="book_name_7">Book test</h3>
-                            <p id="book_author_7">Author: null..</p>
-                            <p id="book_category_7">Category: null..</p>
-                            <p id="book_status_7">Status: null..</p>
-                        </div>
-                    </div>
-
-                    <div class="book-item" id="book_item_8">
-                        <div id="favorite-btn" class="favorite-btn">
-                            <a id="favorite_img" class="favorite_img">
-                                <img id="book_fav_8" class="favorite_img" src="{% static 'images/remove.png' %}" alt="favorite">
-                            </a>
-                        </div>
-                        <img id="book_image_8" src="{% static 'images/book.png' %}" alt="Book Cover" class="book-cover">
-                        <div class="book-details">
-                            <h3 id="book_name_8">Book test</h3>
-                            <p id="book_author_8">Author: null..</p>
-                            <p id="book_category_8">Category: null..</p>
-                            <p id="book_status_8">Status: null..</p>
-                        </div>
-                    </div>
-
+    
+                    <ul>
+                        <li>
+                            <a id="security" href="#" class="nav-link active">Account Security</a>
+                        </li>
+                        <li>
+                            <a id="preferences" href="#" class="nav-link">Preferences</a>
+                        </li>
+                        <li>
+                            <a id="delete" href="#" class="nav-link">Delete Account</a>
+                        </li>
+                    </ul>
                 </div>
-            </div>
-
-            <div class="full_button" id="full_button">
-                <a id="prev" href='#'><img src='{% static "images/prev_page_empty.png" %}' width="25px" height="25px"></a>
-                <a id="next" href='#'><img src='{% static "images/next_page_empty.png" %}' width="25px" height="25px"></a>
+    
+                <hr class="vertical-line">
+    
+                <div class="security">
+                    <div class="account-settings">
+                        <h1>Account</h1>
+                        <p>Edit your account settings and change your password here.</p>
+                    </div>
+                    <hr>
+    
+                    <form>
+                        <div class="email" >
+                            <label for="email">Email:</label>
+                            <input type="email" id="email" value="null@gmail.com" disabled >
+                        </div>
+                        <hr>
+    
+                        <div class="password">
+                            <input type="password" id="curr_password" placeholder="Enter Current Password">
+                            <input type="password" id="new_password" placeholder="Enter New Password">
+                            <p id="error" class="error">Please fill all fields.</p>
+                        </div>
+    
+                        <button id="btn_change_pass" class="change-password">Change Password</button>
+                    </form>
+                </div>
             </div>
 
          </main>
 
         <!-- Script -->
-        <script src="{% static '10_myUploadedBook_page/script.js' %}"></script>
+        <script src="{% static '11_accountSettings_page/script.js' %}"></script>
         <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
 
     </body>
