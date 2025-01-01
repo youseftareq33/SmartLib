@@ -87,6 +87,9 @@ def MyUploadedBookPage(request):
 
 def AccountSettingsPage(request):
     return render(request, '11_accountSettings_page.html')
+
+def ViewBookPage(request, book_id):
+    return render(request, '12_viewBook_page.html', {'book_id': book_id})
 #--------------------------------------------------------------------------------------------
 
 
@@ -421,6 +424,21 @@ class ReaderInfoListView(APIView):
         
 #--------------------------------------------------------------------------------------------
 
+#-- get book
+class BookInfoListView(APIView):
+    def get(self, request):
+
+        book_id = request.query_params.get('book_id')
+
+        try:
+            book = Book.objects.get(book_id=book_id)
+            serializer = BookSerializer(book)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Reader.DoesNotExist:
+            return Response({"error": "Book not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+#--------------------------------------------------------------------------------------------
+
 #-- list book (pagination achived)
 class BookListView(APIView):
     def get(self, request):
@@ -459,19 +477,19 @@ class AddRatingAndReviewView(APIView):
     def post(self, request):
         # Extract data from request
         book_id = request.data.get("book_id")
-        reader_id = request.data.get("reader_id")
+        user_id = request.data.get("user_id")
         rating = request.data.get("rating")
         review = request.data.get("review")
 
         # Validate that required fields are present
-        if not (book_id and reader_id and rating is not None and review):
-            return Response({"error": "All fields (book_id, reader_id, rating, review) are required."}, 
+        if not (book_id and user_id and rating is not None and review):
+            return Response({"error": "All fields (book_id, user_id, rating, review) are required."}, 
                             status=status.HTTP_400_BAD_REQUEST)
 
         # Fetch the book and reader objects
         try:
             book = Book.objects.get(pk=book_id)
-            reader = Reader.objects.get(pk=reader_id)
+            reader = Reader.objects.get(user_id=user_id)
         except Book.DoesNotExist:
             return Response({"error": "Book not found."}, status=status.HTTP_404_NOT_FOUND)
         except Reader.DoesNotExist:
@@ -498,15 +516,76 @@ class AddRatingAndReviewView(APIView):
         return Response({"message": "Rating and review added successfully."}, status=status.HTTP_201_CREATED)
     
 #--------------------------------------------------------------------------------------------
+#-- list rating and review:
+
+class RatingAndReviewListView(APIView):
+    def get(self, request):
+        book_id = request.query_params.get("book_id")
+        
+        try:
+            # Retrieve all rating and reviews, order by 'id' in descending order
+            rating_review = Rating_And_Review.objects.filter(book_id=book_id).select_related('reader__user').order_by('-rating_and_review_id')
+
+            # Prepare the data with user_name added
+            reviews_data = []
+            for review in rating_review:
+                review_data = {
+                    **RatingAndReviewSerializer(review).data,  # Serialize the review
+                    'user_name': review.reader.user.user_name  # Add the user's name from related Reader and User
+                }
+                reviews_data.append(review_data)
+
+            paginator = RatingAndReviewPagination()
+            result_page = paginator.paginate_queryset(reviews_data, request)
+            return paginator.get_paginated_response(result_page)
+
+        except Rating_And_Review.DoesNotExist:
+            return Response({"error": "rating and review not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+        
+
+#--------------------------------------------------------------------------------------------
 
 #-- list Most Rating book (pagination achived)
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
+
 class MostRating_BookListView(APIView):
     def get(self, request):
-        books = Book.objects.filter(status=Book.Status.ACCEPTED).order_by('-book_rating_avg')
+        # Get the filter parameters from the request query
+        rating_filter = request.query_params.get('rating', None)
+        reading_counter_filter = request.query_params.get('reading_counter', None)
+
+        # Filter books by status
+        books = Book.objects.filter(status=Book.Status.ACCEPTED)
+
+        # Apply rating filter if provided
+        if rating_filter:
+            try:
+                rating_filter = int(rating_filter)
+                books = books.filter(book_rating_avg__gte=rating_filter)  # Books with rating greater than or equal to provided value
+            except ValueError:
+                return Response({"error": "Invalid rating filter value"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Apply reading_counter filter if provided
+        if reading_counter_filter:
+            try:
+                reading_counter_filter = int(reading_counter_filter)
+                books = books.filter(book_reading_counter__gte=reading_counter_filter)  # Books with reading_counter greater than or equal to provided value
+            except ValueError:
+                return Response({"error": "Invalid reading_counter filter value"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Order by book_rating_avg and book_reading_counter
+        books = books.order_by('-book_rating_avg', '-book_reading_counter')  # First by rating, then by reading counter
+
+        # Pagination
         paginator = BookPagination()
         result_page = paginator.paginate_queryset(books, request)
         serializer = BookSerializer(result_page, many=True)
         return paginator.get_paginated_response(serializer.data)
+
     
 #--------------------------------------------------------------------------------------------
 

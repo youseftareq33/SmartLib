@@ -263,6 +263,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (wishList.book_image) {
                                 wishList_image.src = wishList.book_image;
                             }
+
+                            wishList_item.addEventListener('click', () => {
+                                window.location.href = `/viewBookPage/${wishList.book_id}`;
+                            });
                             
                         } else {
                             // If no data for the wishList, hide the book item
@@ -726,6 +730,10 @@ function updateBookDetails(data) {
                 bookImage.src = book.book_image;
             }
 
+            bookItem.addEventListener('click', () => {
+                window.location.href = `/viewBookPage/${book.book_id}`;
+            });
+
         } else {
             // If no data for the book, hide the book item
             bookItem.style.display = 'none';
@@ -741,8 +749,8 @@ const removeButtons = document.querySelectorAll('[id^="favorite-btn"]');
 const removeImgs = document.querySelectorAll('[id^="favorite_img"] img');
 
 removeButtons.forEach((removeButtons, index) => {
-    removeButtons.addEventListener('click', () => {
-
+    removeButtons.addEventListener('click', (event) => {
+        event.stopPropagation();
         document.getElementById("alert-stack").style.display = "flex";
 
         document.getElementById("closeBtn-alert").onclick = function() {

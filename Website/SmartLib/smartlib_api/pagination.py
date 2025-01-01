@@ -19,3 +19,7 @@ class UploadedBookPagination(PageNumberPagination):
 class GameficationPagination(PageNumberPagination):
     page_size = 5  # The number of books per page
     page_size_query_param = 'page_size'  # Allows clients to modify page size
+
+class RatingAndReviewPagination(PageNumberPagination):
+    page_size = 3  # The number of books per page
+    page_size_query_param = 'page_size'  # Allows clients to modify page size

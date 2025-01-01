@@ -230,21 +230,6 @@ document.addEventListener('DOMContentLoaded', () => {
         wishList_1.style.display = 'none';
         wishList_2.style.display = 'none';
         wishList_3.style.display = 'none';
-
-        // const notificationList = [
-        //     document.getElementById('notifi-item_1'),
-        //     document.getElementById('notifi-item_2'),
-        //     document.getElementById('notifi-item_3')
-        // ];
-
-        
-        // notificationList.forEach((notificationElement, index) => {
-        //     if (notificationElement) { // Ensure the element exists
-        //         notificationElement.addEventListener('click', () => {
-        //             window.location.href = `/`; // Example URL
-        //         });
-        //     }
-        // });
         
 
         // Fetch initial data when page loads
@@ -284,6 +269,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (wishList.book_image) {
                                 wishList_image.src = wishList.book_image;
                             }
+
+                            wishList_item.addEventListener('click', () => {
+                                window.location.href = `/viewBookPage/${wishList.book_id}`;
+                            });
                             
                         } else {
                             // If no data for the wishList, hide the book item
@@ -609,20 +598,21 @@ links.forEach(link => {
         event.preventDefault(); // Prevent default behavior of anchor links
 
         // Remove 'active' class from all links
-        links.forEach(l => l.classList.remove('active'));
+        
 
         if(this.id === "security"){
+            links.forEach(l => l.classList.remove('active'));
             this.classList.add('active');
             document.querySelector(".security").style.display = "flex";
             document.querySelector(".preferences").style.display = "none";
         }
         else if(this.id === "preferences"){
+            links.forEach(l => l.classList.remove('active'));
             this.classList.add('active');
             document.querySelector(".security").style.display = "none";
             document.querySelector(".preferences").style.display = "flex";
         }
         else if(this.id === "delete") {
-            this.classList.add('active');
             document.getElementById("alert-stack").style.display = "flex";
 
             document.getElementById("closeBtn-alert").onclick = function() {

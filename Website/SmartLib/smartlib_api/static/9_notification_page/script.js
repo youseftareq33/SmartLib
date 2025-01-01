@@ -257,6 +257,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (wishList.book_image) {
                                 wishList_image.src = wishList.book_image;
                             }
+
+                            wishList_item.addEventListener('click', () => {
+                                window.location.href = `/viewBookPage/${wishList.book_id}`;
+                            });
                             
                         } else {
                             // If no data for the wishList, hide the book item
@@ -610,13 +614,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             else{
             currentData = data; // Store the fetched data
-            updateNotificationDetails(data); // Update the Notification details initially
+            updateCommentDetails(data); // Update the Notification details initially
 
             // Event listener for "Previous" button
             mission_prev.addEventListener('click', (event) => {
                 event.preventDefault(); 
                 if (currentData.previous) {
-                    loadMissions(currentData.previous); 
+                    loadComment(currentData.previous); 
                 }
             });
 
@@ -624,7 +628,7 @@ document.addEventListener('DOMContentLoaded', () => {
             mission_next.addEventListener('click', (event) => {
                 event.preventDefault(); 
                 if (currentData.next) {
-                    loadMissions(currentData.next); 
+                    loadComment(currentData.next); 
                 }
             });
             }
@@ -637,7 +641,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // Function to load missions based on the next or previous URL
-function loadMissions(url) {
+function loadComment(url) {
     fetch(url)
         .then(response => {
             if (!response.ok) {
@@ -647,7 +651,7 @@ function loadMissions(url) {
         })
         .then(data => {
             currentData = data; 
-            updateNotificationDetails(data); 
+            updateCommentDetails(data); 
         })
         .catch(error => {
             console.error('Error loading missions', error);
@@ -655,7 +659,7 @@ function loadMissions(url) {
 }
 
 // Function to update book details and pagination buttons
-function updateNotificationDetails(data) {
+function updateCommentDetails(data) {
     const mission_prev = document.querySelector('#mission_prev img');
     const mission_next = document.querySelector('#mission_next img');
 

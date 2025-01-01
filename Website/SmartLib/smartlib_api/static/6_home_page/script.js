@@ -226,20 +226,20 @@ document.addEventListener('DOMContentLoaded', () => {
         wishList_2.style.display = 'none';
         wishList_3.style.display = 'none';
 
-        // const notificationList = [
-        //     document.getElementById('notifi-item_1'),
-        //     document.getElementById('notifi-item_2'),
-        //     document.getElementById('notifi-item_3')
-        // ];
+        const wishList = [
+            document.getElementById('wishlist-item_1'),
+            document.getElementById('wishlist-item_2'),
+            document.getElementById('wishlist-item_3')
+        ];
 
         
-        // notificationList.forEach((notificationElement, index) => {
-        //     if (notificationElement) { // Ensure the element exists
-        //         notificationElement.addEventListener('click', () => {
-        //             window.location.href = `/`; // Example URL
-        //         });
-        //     }
-        // });
+        wishList.forEach((wishListElement, index) => {
+            if (wishListElement) { // Ensure the element exists
+                wishListElement.addEventListener('click', () => {
+                    window.location.href = `/`; // Example URL
+                });
+            }
+        });
         
 
         // Fetch initial data when page loads
@@ -279,6 +279,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (wishList.book_image) {
                                 wishList_image.src = wishList.book_image;
                             }
+
+                            wishList_item.addEventListener('click', () => {
+                                window.location.href = `/viewBookPage/${wishList.book_id}`;
+                            });
                             
                         } else {
                             // If no data for the wishList, hide the book item
@@ -365,21 +369,6 @@ document.addEventListener('DOMContentLoaded', () => {
     notification_1.style.display = 'none';
     notification_2.style.display = 'none';
     notification_3.style.display = 'none';
-
-    const notificationList = [
-        document.getElementById('notifi-item_1'),
-        document.getElementById('notifi-item_2'),
-        document.getElementById('notifi-item_3')
-    ];
-
-    
-    notificationList.forEach((notificationElement, index) => {
-        if (notificationElement) { // Ensure the element exists
-            notificationElement.addEventListener('click', () => {
-                window.location.href = `/`; // Example URL
-            });
-        }
-    });
     
 
     // Fetch initial data when page loads
@@ -822,6 +811,10 @@ function updateBookDetails(data) {
                 .catch(error => {
                     console.error('Error checking wishlist:', error);
                 });
+
+                bookItem.addEventListener('click', () => {
+                    window.location.href = `/viewBookPage/${book.book_id}`;
+                });
         } else {
             // If no data for the book, hide the book item
             bookItem.style.display = 'none';
@@ -836,7 +829,8 @@ const favButtons_continue = document.querySelectorAll('[id^="favorite-btn_contin
 const favImgs_continue = document.querySelectorAll('[id^="favorite_img_continue"] img');
 
 favButtons_continue.forEach((favButton, index) => {
-    favButton.addEventListener('click', () => {
+    favButton.addEventListener('click', (event) => {
+        event.stopPropagation();
         const favImg = favImgs_continue[index]; // Get the corresponding image
         
         // Get the book_id from currentData.results array
@@ -910,24 +904,6 @@ document.addEventListener('DOMContentLoaded', () => {
     book_most_readed_3.style.display = 'none';
     book_most_readed_4.style.display = 'none';
     book_most_readed_5.style.display = 'none';
-
-    // List of book elements
-    const booksMostReaded = [
-        document.getElementById('book_most_readed_item_1'),
-        document.getElementById('book_most_readed_item_2'),
-        document.getElementById('book_most_readed_item_3'),
-        document.getElementById('book_most_readed_item_4'),
-        document.getElementById('book_most_readed_item_5')
-    ];
-
-    // Add click event listeners to each book element
-    // booksMostReaded.forEach((bookElement, index) => {
-    //     if (bookElement) { // Ensure the element exists
-    //         bookElement.addEventListener('click', () => {
-    //             window.location.href = `/login`; // Example URL
-    //         });
-    //     }
-    // });
 
 
     // Fetch initial data when page loads
@@ -1057,6 +1033,10 @@ function updateBookDetails_most_readed(data) {
                 .catch(error => {
                     console.error('Error checking wishlist:', error);
             });
+
+            bookItem.addEventListener('click', () => {
+                window.location.href = `/viewBookPage/${book.book_id}`;
+            });
         } else {
             // If no data for the book, hide the book item
             bookItem.style.display = 'none';
@@ -1072,7 +1052,8 @@ const favButtons_most_readed = document.querySelectorAll('[id^="favorite-btn_mos
 const favImgs_most_readed = document.querySelectorAll('[id^="favorite_img_most_readed"] img');
 
 favButtons_most_readed.forEach((favButton, index) => {
-    favButton.addEventListener('click', () => {
+    favButton.addEventListener('click', (event) => {
+        event.stopPropagation();
         const favImg = favImgs_most_readed[index]; // Get the corresponding image
         
         // Get the book_id from currentData.results array
@@ -1149,23 +1130,6 @@ document.addEventListener('DOMContentLoaded', () => {
     book_most_rating_4.style.display = 'none';
     book_most_rating_5.style.display = 'none';
 
-    // List of book elements
-    const booksMostRating = [
-        document.getElementById('book_most_rating_item_1'),
-        document.getElementById('book_most_rating_item_2'),
-        document.getElementById('book_most_rating_item_3'),
-        document.getElementById('book_most_rating_item_4'),
-        document.getElementById('book_most_rating_item_5')
-    ];
-
-    // Add click event listeners to each book element
-    // booksMostRating.forEach((bookElement, index) => {
-    //     if (bookElement) { // Ensure the element exists
-    //         bookElement.addEventListener('click', () => {
-    //             window.location.href = `/login`; // Example URL
-    //         });
-    //     }
-    // });
 
 
     // Fetch initial data when page loads
@@ -1296,6 +1260,10 @@ function updateBookDetails_most_rating(data) {
                     console.error('Error checking wishlist:', error);
             });
 
+            bookItem.addEventListener('click', () => {
+                window.location.href = `/viewBookPage/${book.book_id}`;
+            });
+
         } else {
             // If no data for the book, hide the book item
             bookItem.style.display = 'none';
@@ -1310,7 +1278,8 @@ const favButtons_most_rating = document.querySelectorAll('[id^="favorite-btn_mos
 const favImgs_most_rating = document.querySelectorAll('[id^="favorite_img_most_rating"] img');
 
 favButtons_most_rating.forEach((favButton, index) => {
-    favButton.addEventListener('click', () => {
+    favButton.addEventListener('click', (event) => {
+        event.stopPropagation();
         const favImg = favImgs_most_rating[index]; // Get the corresponding image
         
         // Get the book_id from currentData.results array
@@ -1385,24 +1354,6 @@ document.addEventListener('DOMContentLoaded', () => {
     book_last_updated_3.style.display = 'none';
     book_last_updated_4.style.display = 'none';
     book_last_updated_5.style.display = 'none';
-
-    // List of book elements
-    const booksLastUpdated = [
-        document.getElementById('book_last_updated_item_1'),
-        document.getElementById('book_last_updated_item_2'),
-        document.getElementById('book_last_updated_item_3'),
-        document.getElementById('book_last_updated_item_4'),
-        document.getElementById('book_last_updated_item_5')
-    ];
-
-    // Add click event listeners to each book element
-    // booksLastUpdated.forEach((bookElement, index) => {
-    //     if (bookElement) { // Ensure the element exists
-    //         bookElement.addEventListener('click', () => {
-    //             window.location.href = '/login'; // Example URL
-    //         });
-    //     }
-    // });
 
 
     // Fetch initial data when page loads
@@ -1532,6 +1483,10 @@ function updateBookDetails_last_updated(data) {
                 .catch(error => {
                     console.error('Error checking wishlist:', error);
             });
+
+            bookItem.addEventListener('click', () => {
+                    window.location.href = `/viewBookPage/${book.book_id}`;
+            });
         } else {
             // If no data for the book, hide the book item
             bookItem.style.display = 'none';
@@ -1546,7 +1501,8 @@ const favButtons_last_updated = document.querySelectorAll('[id^="favorite-btn_la
 const favImgs_last_updated = document.querySelectorAll('[id^="favorite_img_last_updated"] img');
 
 favButtons_last_updated.forEach((favButton, index) => {
-    favButton.addEventListener('click', () => {
+    favButton.addEventListener('click', (event) => {
+        event.stopPropagation();
         const favImg = favImgs_last_updated[index]; // Get the corresponding image
         
         // Get the book_id from currentData.results array

@@ -1,9 +1,15 @@
+
 //-- Auth Access --
 
 let userId = -1;  
 let user_name="";
 let user_rank="";
-let user_point=0;
+
+// Extract the book_id part
+const url = window.location.href;
+const urlParts = url.split('/');
+const book_id = urlParts[urlParts.length - 2];
+
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('jwt_token');
 
@@ -28,6 +34,65 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         console.log('User ID:', userId);
+
+        // Check if user_id is available
+        if (userId !== -1) {
+            // Make an API call to fetch the user_name using user_id
+            fetch(`/get_book_info/?book_id=${book_id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data) {
+                        document.getElementById('title').textContent = data.book_name;
+                        document.getElementById('author').textContent = `Author: ${data.book_author || 'No Author'}`;
+                        document.getElementById('category').textContent = `Category: ${data.book_type || 'No Category'}`;
+                        document.getElementById('rating').textContent = `Rating: ${'⭐'.repeat(data.book_rating_avg || 0)}`;
+                        const bookImage = document.getElementById('book_img');
+                        if (data.book_image) {
+                            bookImage.src = data.book_image;
+                        }
+
+
+                        document.getElementById('description').textContent = data.book_description;
+
+                    } else {
+                        console.error("Book not found");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching user name:", error);
+                });
+
+            fetch(`/get_reader_info?user_id=${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data) {
+                    const reader_rank = data.reader_rank;  // Assign the fetched reader_rank
+                    document.getElementById('user_rank').textContent = "Rank: " + reader_rank;
+
+                    if(reader_rank=="Rookie"){
+                        document.getElementById('img_rank').src = '/static/images/rookie_rank.png'; 
+                    }
+                    else if(reader_rank=="Bronze"){
+                        document.getElementById('img_rank').src = '/static/images/bronze_rank.png'; 
+                    }
+                    else if(reader_rank=="Silver"){
+                        document.getElementById('img_rank').src = '/static/images/silver_rank.png'; 
+                    }
+                    else if(reader_rank=="Gold"){
+                        document.getElementById('img_rank').src = '/static/images/gold_rank.png'; 
+                    }
+
+                } else {
+                    console.error("Reader not found");
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching Reader:", error);
+            });
+        } 
+        else {
+            console.log("No user_id found.");
+        }
 
     } catch (error) {
         console.error('Invalid token:', error);
@@ -455,7 +520,6 @@ dropdown_user.addEventListener('mouseleave', (event) => {
 });
 
 // Function to handle option click in the dropdown
-// Function to handle option click in the dropdown
 function handleOptionClick_user(option) {
     if (option === 'Rank') { 
         window.location.href = '/rankPage';
@@ -534,86 +598,120 @@ document.getElementById("sendFeedback").onclick = function() {
     document.getElementById("feedbackText").value = '';
 }
 
+//-----------------------------------------------------
+// Stars Rating
 
+const stars = document.querySelectorAll('.star');
+const star_num = document.getElementById('star_num');
+let star_numbers = 0;
+let timeout_star_num; // Variable to store the timeout ID
 
+stars.forEach((star, index) => {
+    // Hover effect
+    star.addEventListener('mouseover', function () {
+        clearTimeout(timeout_star_num); // Clear any previous timeout
+        resetStars();
+        highlightStars(index);
+        star_num.textContent = (index + 1) + " Stars"; // Update the text inside <p>
+    });
 
+    // Remove hover effect when the mouse leaves
+    star.addEventListener('mouseout', function () {
+        resetStars();
+        const activeStars = document.querySelectorAll('.star.active');
+        activeStars.forEach((s, i) => highlightStars(i));
 
-//------------------------------------------------------------------------
-
-// points
-document.addEventListener('DOMContentLoaded', () => {
-    fetch(`/get_reader_info?user_id=${userId}`)
-    .then(response => response.json())
-    .then(data => {
-        if (data) {
-            const reader_rank = data.reader_rank;  // Assign the fetched reader_rank
-            document.getElementById('user_rank').textContent = "Rank: " + reader_rank;
-
-            if(reader_rank=="Rookie"){
-                document.getElementById('img_rank').src = '/static/images/rookie_rank.png'; 
-            }
-            else if(reader_rank=="Bronze"){
-                document.getElementById('img_rank').src = '/static/images/bronze_rank.png'; 
-            }
-            else if(reader_rank=="Silver"){
-                document.getElementById('img_rank').src = '/static/images/silver_rank.png'; 
-            }
-            else if(reader_rank=="Gold"){
-                document.getElementById('img_rank').src = '/static/images/gold_rank.png'; 
-            }
-
-            user_point = data.reader_point;  
-            document.getElementById('num_points').textContent = user_point;
-
-
-            let numPoints = user_point;
-            console.log(numPoints);
-
-            function updateTriangle(){
-                let tri=-9; 
-
-                if(numPoints>0 && numPoints<=500){
-                    tri=(numPoints*0.834)-9;
-                }
-                else if(numPoints>500 && numPoints<=1500){
-                    tri=((500*0.834)+((numPoints-500)*0.435))-9;
-                }
-                else if(numPoints>1500 && numPoints<=3000){
-                    tri=((853)+((numPoints-1500)*0.2978))-9;
-                }
-                return tri;
-            }
-
-            function updateFill(){
-                let fill=0; 
-                if(numPoints>0 && numPoints<=500){
-                    fill=(numPoints*0.834);
-                }
-                else if(numPoints>500 && numPoints<=1500){
-                    fill=((417)+((numPoints-500)*0.435));
-                }
-                else if(numPoints>1500 && numPoints<=3000){
-                    fill=((853)+((numPoints-1500)*0.2978));
-                }
-                return fill;
-            }
-
-
-            document.querySelector(".triangle-cursor").style.left = updateTriangle() + "px";
-            document.querySelector(".progress-fill").style.width = updateFill() + "px";
-
+        if (activeStars.length > 0) {
+            star_num.textContent = activeStars.length + " Stars"; // Keep the active star count
         } else {
-            console.error("Reader not found");
+            // Delay the reset by 0.5 seconds
+            timeout_star_num = setTimeout(() => {
+                star_num.textContent = ""; // Reset to empty after 0.5s
+            }, 180);
         }
-    })
-    .catch(error => {
-        console.error("Error fetching Reader:", error);
+    });
+
+    // Click event to select the rating
+    star.addEventListener('click', function () {
+        clearTimeout(timeout_star_num); // Clear any previous timeout
+        stars.forEach(s => s.classList.remove('active'));
+        highlightStars(index);
+        stars.forEach((s, i) => {
+            if (i <= index) {
+                s.classList.add('active');
+            }
+        });
+
+        const rating = index + 1; // Index starts from 0, so add 1
+        star_num.textContent = rating + " Stars"; // Update the text after selection
+        star_numbers = rating;
     });
 });
 
+// Helper function to highlight stars
+function highlightStars(index) {
+    for (let i = 0; i <= index; i++) {
+        stars[i].style.color = '#FFD700'; // Golden color for highlighted stars
+    }
+}
 
-//------------------------------------------------------------------------
-// records:
+// Helper function to reset stars color
+function resetStars() {
+    stars.forEach(star => {
+        star.style.color = '#ddd'; // Reset to grey
+    });
+}
+
+// --------------------------------------------
+
+//- submit rate and review:
+const review_input = document.getElementById('review_input');
+const submit_review_btn = document.getElementById('submit_review_btn');
+const error_msg = document.getElementById('error');
+
+submit_review_btn.addEventListener('click', async (event) => {
+    event.preventDefault();
+    error_msg.style.display = "none";
+
+    if (review_input.value === "" || star_numbers === 0) {
+        error_msg.textContent = "Please fill all fields.";
+        error_msg.style.color = "red";
+        error_msg.style.display = 'block';
+    } else {
+        const response = await fetch('/insertRatingAndReview/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                book_id: book_id,
+                user_id: userId,
+                rating: star_numbers,
+                review: review_input.value
+            })
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            error_msg.textContent = data.error || "An unexpected error occurred.";
+            error_msg.style.color = "red";
+            error_msg.style.display = "block";
+        } else {
+            // Success: reset the input and stars
+            error_msg.style.display = "none";
+            review_input.value = "";
+            star_numbers = 0;
+            star_num.textContent = ""; // Reset star_num text
+            resetStars(); // Reset star styles to default
+            stars.forEach(star => star.classList.remove('active')); // Remove active class from all stars
+        }
+    }
+});
+
+
+//------------------------------------------------------
+
+// review comment:
 
 let currentData=null;
 
@@ -621,24 +719,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const mission_prev = document.getElementById('mission_prev');
     const mission_next = document.getElementById('mission_next');
 
-    const mission_1 = document.getElementById('mission_1');
-    const mission_2 = document.getElementById('mission_2');
-    const mission_3 = document.getElementById('mission_3');
-    const mission_4 = document.getElementById('mission_4');
-    const mission_5 = document.getElementById('mission_5');
+    const user_rate_container_1 = document.getElementById('user_rate_container_1');
+    const user_rate_container_2 = document.getElementById('user_rate_container_2');
+    const user_rate_container_3 = document.getElementById('user_rate_container_3');
 
 
-    mission_1.style.display='none';
-    mission_2.style.display='none';
-    mission_3.style.display='none';
-    mission_4.style.display='none';
-    mission_5.style.display='none';
+    user_rate_container_1.style.display='none';
+    user_rate_container_2.style.display='none';
+    user_rate_container_3.style.display='none';
 
     // Fetch initial data when page loads
-    fetch(`/getGamificationRecord?user_id=${userId}`)
+    fetch(`/list_Three-rating_and_review?book_id=${book_id}`)
         .then(response => {
             if (!response.ok) {
-                throw new Error('Failed to fetch Gamefication');
+                throw new Error('Failed to fetch Comment');
             }
             return response.json();
         })
@@ -648,70 +742,64 @@ document.addEventListener('DOMContentLoaded', () => {
                 mission_next.style.display = 'none';
             }
             else{
-                mission_prev.style.display = 'block';
-                mission_next.style.display = 'block';
-                currentData = data; // Store the fetched data
-                updateGameficationDetails(data); // Update the Gamefication details initially
+            currentData = data; // Store the fetched data
+            updateCommentDetails(data); // Update the Comment details initially
 
-                // Event listener for "Previous" button
-                mission_prev.addEventListener('click', (event) => {
-                    event.preventDefault(); 
-                    if (currentData.previous) {
-                        loadMissions(currentData.previous); 
-                    }
-                });
+            // Event listener for "Previous" button
+            mission_prev.addEventListener('click', (event) => {
+                event.preventDefault(); 
+                if (currentData.previous) {
+                    loadComment(currentData.previous); 
+                }
+            });
 
-                // Event listener for "Next" button
-                mission_next.addEventListener('click', (event) => {
-                    event.preventDefault(); 
-                    if (currentData.next) {
-                        loadMissions(currentData.next); 
-                    }
-                });
+            // Event listener for "Next" button
+            mission_next.addEventListener('click', (event) => {
+                event.preventDefault(); 
+                if (currentData.next) {
+                    loadComment(currentData.next); 
+                }
+            });
             }
         })
         .catch(error => {
-            console.error('Error fetching Gamefication', error);
+            console.error('Error fetching Comment', error);
         });
 
 });
 
 
-// Function to load missions based on the next or previous URL
-function loadMissions(url) {
+// Function to load comment based on the next or previous URL
+function loadComment(url) {
     fetch(url)
         .then(response => {
             if (!response.ok) {
-                throw new Error('Failed to load missions');
+                throw new Error('Failed to load comment');
             }
             return response.json();
         })
         .then(data => {
             currentData = data; 
-            updateGameficationDetails(data); 
+            updateCommentDetails(data); 
         })
         .catch(error => {
-            console.error('Error loading missions', error);
+            console.error('Error loading comment', error);
         });
 }
 
 // Function to update book details and pagination buttons
-function updateGameficationDetails(data) {
+function updateCommentDetails(data) {
     const mission_prev = document.querySelector('#mission_prev img');
     const mission_next = document.querySelector('#mission_next img');
 
-    const mission_1 = document.getElementById('mission_1');
-    const mission_2 = document.getElementById('mission_2');
-    const mission_3 = document.getElementById('mission_3');
-    const mission_4 = document.getElementById('mission_4');
-    const mission_5 = document.getElementById('mission_5');
+    const user_rate_container_1 = document.getElementById('user_rate_container_1');
+    const user_rate_container_2 = document.getElementById('user_rate_container_2');
+    const user_rate_container_3 = document.getElementById('user_rate_container_3');
 
+    user_rate_container_1.style.display='none';
+    user_rate_container_2.style.display='none';
+    user_rate_container_3.style.display='none';
 
-    mission_1.style.display='none';
-    mission_2.style.display='none';
-    mission_3.style.display='none';
-    mission_4.style.display='none';
-    mission_5.style.display='none';
 
     // Show or hide pagination buttons based on available data
     if (data.previous == null && data.next == null) {
@@ -728,39 +816,26 @@ function updateGameficationDetails(data) {
         mission_next.src = '/static/images/next_page.png';
     }
 
-    // Update the mission details dynamically
-    data.results.forEach((mission, index) => {
-        const missionDate = document.getElementById(`mission-date_${index + 1}`);
-        const missionDesc = document.getElementById(`mission-desc_${index + 1}`);
-        const missionPoints = document.getElementById(`mission-points_${index + 1}`);
+    // Update the comment details dynamically
+    data.results.forEach((comment, index) => {
+        const user_rate_container_userName = document.getElementById(`rate_container_user_name_${index + 1}`);
+        const user_rate_container_stars = document.getElementById(`rate_container_stars_${index + 1}`);
+        const user_rate_container_desc = document.getElementById(`rate_container_description_${index + 1}`);
 
-        const mission_Item = document.getElementById(`mission_${index + 1}`);
+        const user_rate_container_Item = document.getElementById(`user_rate_container_${index + 1}`);
 
         // If there is data for the mission, display the mission item
-        if (mission) {
-            mission_Item.style.display = 'flex'; // Make the mission item visible
+        if (comment) {
+            user_rate_container_Item.style.display = 'block'; // Make the mission item visible
 
-            // Update book details
-            const dateString = mission.date_and_time;
-            // Parse the date string into a Date object
-            const date = new Date(dateString);
+            user_rate_container_userName.textContent = comment.user_name || 'User';
 
-            // Format the date
-            const options = {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: 'numeric',
-                hour12: true,
-                timeZone: 'UTC' // Adjust timezone if needed
-            };
-            const formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
+            const rating = comment.rating || 0; // Get the rating (default to 0 if not available)
+            const stars = '⭐'.repeat(rating); // Create a string of stars based on the rating
+            user_rate_container_stars.textContent = `${stars} ${rating} Stars`;
 
-            missionDate.textContent = formattedDate || 'Date..';
-            missionDesc.textContent = mission.gamification_description || 'Description..';
-            missionPoints.textContent = `+${mission.achieved_point || 'point..'}`;
+            user_rate_container_desc.textContent = comment.review || 'No review provided';
+            
             
         } 
         else {
