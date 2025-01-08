@@ -62,11 +62,12 @@ class Book(models.Model):
         REJECTED = 'Rejected', 'Rejected'
 
     book_id = models.AutoField(primary_key=True)
+    book_file = models.FileField(upload_to='books/files/', null=True, blank=True)  
     book_name = models.CharField(max_length=255)
     book_author = models.CharField(max_length=255)
     book_type = models.CharField(max_length=255)
     book_barcode = models.CharField(max_length=255, unique=True)  
-    book_image = models.BinaryField(null=True, blank=True)
+    book_image = models.FileField(upload_to='books/images/', null=True, blank=True)  
     book_reading_counter=models.IntegerField(default=0)
     book_rating_avg=models.IntegerField(default=0)
     book_uploaded_date = models.DateTimeField(default=now)
@@ -116,6 +117,8 @@ class FeedBack(models.Model):
     feedback_id = models.AutoField(primary_key=True)
     reader = models.ForeignKey('Reader', on_delete=models.CASCADE, db_column='reader_id')  
     feedback_description = models.CharField(max_length=255)
+    feedback_time = models.DateTimeField(null=True, default=now)
+
     class Meta:
         db_table = 'FeedBack'
         unique_together = (('feedback_id', 'reader'),)
@@ -125,7 +128,7 @@ class Notification(models.Model):
     reader = models.ForeignKey('Reader', on_delete=models.CASCADE, db_column='reader_id')
     manager = models.ForeignKey('Manager', on_delete=models.CASCADE, db_column='manager_id')
     notification_record = models.CharField(max_length=255)
-    notification_title = models.CharField(max_length=255)
+    notification_title = models.CharField(max_length=255, default=None)
     class Meta:
         db_table = 'Notification'
         unique_together = (('notification_id', 'reader', 'manager'),)

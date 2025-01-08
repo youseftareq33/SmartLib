@@ -36,6 +36,8 @@ urlpatterns = [
     path('check-email-api',EmailExistView.as_view()),
     path('reset-password-api', reset_password.as_view()), 
     path('getAllCategories/', CategoryListView.as_view()),
+    path('guest-search-page/', GuestSearchPage, name='guest-search'), 
+    path('search-page/', ReaderSearchPage, name='reader-search'), 
     path('getAllBooks/', BookListView.as_view()),
     path('add-to-wishlist/', AddBookToWishlist.as_view(), name='add_to_wishlist'),
     path('remove-from-wishlist/', RemoveBookFromWishlist.as_view(), name='remove_from_wishlist'),

@@ -4,6 +4,10 @@ class BookPagination(PageNumberPagination):
     page_size = 5  # The number of books per page
     page_size_query_param = 'page_size'  # Allows clients to modify page size
 
+class BookSearchPagination(PageNumberPagination):
+    page_size = 4  # The number of books per page
+    page_size_query_param = 'page_size'  # Allows clients to modify page size
+
 class WishListPagination(PageNumberPagination):
     page_size = 8  # The number of books per page
     page_size_query_param = 'page_size'  # Allows clients to modify page size

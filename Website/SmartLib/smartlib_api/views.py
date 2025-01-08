@@ -90,6 +90,14 @@ def AccountSettingsPage(request):
 
 def ViewBookPage(request, book_id):
     return render(request, '12_viewBook_page.html', {'book_id': book_id})
+
+def GuestSearchPage(request):
+    search = request.GET.get('search', '')  # Retrieve search from query parameters
+    return render(request, '1_4_guestSearch_page.html', {'search': search})
+
+def ReaderSearchPage(request):
+    search = request.GET.get('search', '')  # Retrieve search from query parameters
+    return render(request, '13_readerSearch_page.html', {'search': search})
 #--------------------------------------------------------------------------------------------
 
 
@@ -548,9 +556,7 @@ class RatingAndReviewListView(APIView):
 #--------------------------------------------------------------------------------------------
 
 #-- list Most Rating book (pagination achived)
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework import status
+
 
 class MostRating_BookListView(APIView):
     def get(self, request):
@@ -610,7 +616,7 @@ class BookSearchView(APIView):
 
         # Filter by minimum rating if provided
         if min_rating:
-            books = books.filter(book_rating_avg__gte=min_rating)
+            books = books.filter(book_rating_avg__gte=min_rating).order_by('book_rating_avg')
 
         # Apply sorting
         if sort_by == 'reviewed':
@@ -621,7 +627,7 @@ class BookSearchView(APIView):
             books = books.order_by('-book_uploaded_date')
 
         # Apply pagination
-        paginator = BookPagination()
+        paginator = BookSearchPagination()
         paginated_books = paginator.paginate_queryset(books, request)
 
         # Serialize the paginated data
@@ -1086,6 +1092,7 @@ class DeleteUser(APIView):
             user = User.objects.get(user_id=user_id)  # Use `user_id` instead of `id`
             user.is_active = False  # Deactivate the user
             user.user_name = f"{user_id}_Deleted-Account"  # Rename the user to indicate it's deleted
+            user.email = f"{user_id}_Deleted-Account"
             user.save()  # Save the changes
 
             return Response({"message": "User deactivated successfully"}, status=status.HTTP_200_OK)

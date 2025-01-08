@@ -175,12 +175,25 @@ dropdownCategories.addEventListener('mouseleave', (event) => {
 function handleOptionClick_categories(category_id) {
     dropdownCategories.style.display = 'none'; // Hide dropdown after selection
     categoriesButton.classList.remove('active'); // Remove 'active' class after selection
-    // debug
-    console.log(`Selected Category ID: ${category_id}, Name: ${categoriesList[category_id]}`);
+    
+    localStorage.setItem('selected_category', category_id);
+    window.location.href = '/search-page/?search=';
 }
 //---------------------------------------------------------------------------------------
 
-//-- search --
+// search:
+
+document.getElementById('search-input').addEventListener('keydown', function (event) {
+    if (event.key === 'Enter') { // Check if the pressed key is 'Enter'
+        const inputValue = this.value.trim(); // Get the input value and trim whitespace
+        if (inputValue != '') {
+            const search_input = encodeURIComponent(inputValue);
+            const redirectUrl = `/search-page?search=${search_input}`; // Append email to URL
+            window.location.href = redirectUrl; // Redirect to confirmation page
+        } 
+
+    }
+});
 
 //---------------------------------------------------------------------------------------
 
