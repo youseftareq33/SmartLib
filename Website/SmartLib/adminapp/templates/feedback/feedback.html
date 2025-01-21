@@ -90,27 +90,62 @@
 
         <main>
             <h1>Feedback</h1>
-            <div id="feedback" class="feedback-container">
-                {% if feedbacks %}
-                    {% for feedback in feedbacks %}
-                    <div class="feedback-item">
-                        <h3>User: {{ feedback.user_name }}</h3>
-                        <p>Feedback: {{ feedback.feedback_description }}</p>
-                        <p>Time: {{ feedback.feedback_time }}</p>
-                        
-                    </div>
-                    <br>
-                    {% empty %}
-                    <p>No feedback available.</p>
-                    {% endfor %}
-                {% else %}
-                    <p>No feedback available.</p>
-                {% endif %}
-            </div>
             
+            <div id="feedback" class="feedback-container">
+                {% for feedback in feedbacks %}
+                <div class="feedback-item">
+                    <h3>User: {{ feedback.reader.user.user_name }}</h3>
+                    <p>Feedback: {{ feedback.feedback_description }}</p>
+                    <p>Time: {{ feedback.feedback_time }}</p>
+                </div>
+                {% endfor %}
+            </div>  
+            <div id="pagination" class="pagination">
+                <button id="prevPage" onclick="fetchBooks(currentPage - 1)" disabled>Previous</button>
+                <div id="pageNumbers" class="page-numbers"></div>
+                <button id="nextPage" onclick="fetchBooks(currentPage + 1)" disabled>Next</button>
+            </div>          
         </main>
+        
     </div>
+    <style>
+       .feedback-item {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
 
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.pagination button {
+    margin: 0 5px;
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+.pagination button.current-page {
+    background-color: #007bff;
+    color: #fff;
+    font-weight: bold;
+}
+
+.pagination button:disabled {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+
+}
+
+    </style>
+    
     <script src="{% static 'js/feedback.js' %}"></script>
 </body>
 </html>

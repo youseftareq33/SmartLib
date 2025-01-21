@@ -174,13 +174,16 @@ dropdown_user.addEventListener('mouseleave', (event) => {
 let currentBookPage = 1;
 let categories = []; 
 
-let currentPage = 1; // Track the current page
-let totalPages = 0;  // Track the total number of pages
+
+let currentPage = 1; // Define globally
+let totalPages = 1; // Total pages
 
 function fetchBooks(page = 1) {
+    if (page < 1 || page > totalPages) return; // Prevent invalid page navigation
+
     Promise.all([
-        fetch(`/adminpanel/api/books/?page=${page}&limit=4`).then(res => res.json()), // Limit to 5 books per page
-        fetch(`/adminpanel/api/categories/`).then(res => res.json())
+        fetch(`/adminpanel/api/books/?page=${page}&limit=4`).then(res => res.json()), // Fetch books
+        fetch(`/adminpanel/api/categories/`).then(res => res.json()) // Fetch categories
     ])
     .then(([booksData, categoriesData]) => {
         const books = booksData.books || [];
@@ -188,8 +191,8 @@ function fetchBooks(page = 1) {
         const tbody = document.getElementById('book-table-body');
         tbody.innerHTML = ''; 
 
-        totalPages = booksData.totalPages || 1; // Get the total number of pages from the API response
-        currentPage = page; // Update the current page
+        totalPages = booksData.total_pages || 1; // Update total pages
+        currentPage = booksData.current_page; // Update current page
 
         if (books.length === 0) {
             tbody.innerHTML = '<tr><td colspan="7">No books available.</td></tr>';
@@ -200,77 +203,69 @@ function fetchBooks(page = 1) {
         books.forEach(book => {
             const row = document.createElement('tr');
             row.setAttribute('data-book-id', book.book_id);
-        
-            // Create the category select dropdown
+
+            // Create the category dropdown
             let categoryDropdown = `<select data-id="${book.book_id}" data-field="category_name" onchange="saveBookField(this)">`;
-        
-            // Loop through the categories to find the match
             categories.forEach(category => {
                 const isSelected = category.category_name === book.category_name ? 'selected' : '';
                 categoryDropdown += `<option value="${category.category_name}" ${isSelected}>${category.category_name}</option>`;
             });
-        
-            // Close the select element
             categoryDropdown += `</select>`;
-        
-            // Generate the table row
+
+            // Populate the row
             row.innerHTML = `
-                <td data-field="book_name" contenteditable="true">${book.book_name || 'N/A'}</td>
-                <td data-field="book_author" contenteditable="true">${book.book_author || 'Unknown'}</td>
-                <td data-field="book_barcode" contenteditable="true">${book.book_barcode || 'N/A'}</td>
-                <td>
+                <td data-field="book_name" contenteditable="true" class="scrollable-cell">${book.book_name || 'N/A'}</td>
+                <td data-field="book_author" contenteditable="true" class="scrollable-cell">${book.book_author || 'Unknown'}</td>
+                <td data-field="book_barcode" contenteditable="true" class="scrollable-cell">${book.book_barcode || 'N/A'}</td>
+                <td class="scrollable-cell">
                     <img src="${book.book_image || '/static/images/default.png'}" alt="Book Cover" width="50">
                 </td>
-                <td>${categoryDropdown}</td>
-                <td>
+                <td class="scrollable-cell">${categoryDropdown}</td>
+                <td class="scrollable-cell">
                     <select data-id="${book.book_id}" data-field="status" onchange="saveBookField(this)">
                         <option value="Pending" ${book.status === 'Pending' ? 'selected' : ''}>Pending</option>
                         <option value="Accepted" ${book.status === 'Accepted' ? 'selected' : ''}>Accepted</option>
                         <option value="Rejected" ${book.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
                     </select>
                 </td>
-                <td data-field="book_description" contenteditable="true">${book.book_description || 'No Description'}</td>
+                <td data-field="book_description" contenteditable="true" class="scrollable-cell">${book.book_description || 'No Description'}</td>
             `;
-        
+
             tbody.appendChild(row);
         });
-        
 
         enableCellEditing(); // Enable cell editing for the table
-        updatePagination(totalPages, currentPage); // Update the pagination UI
+        updatePagination(totalPages, currentPage); // Update pagination UI
     })
     .catch(error => {
         console.error('Error fetching books or categories:', error);
         alert('Failed to load books. Please try again.');
     });
 }
+
 function updatePagination(totalPages, currentPage) {
     const pagination = document.getElementById('pagination');
     const prevButton = document.getElementById('prevPage');
     const nextButton = document.getElementById('nextPage');
     const pageNumbers = document.getElementById('pageNumbers');
 
-    // Enable or disable Previous button
-    prevButton.disabled = currentPage === 1;
-
-    // Enable or disable Next button
-    nextButton.disabled = currentPage === totalPages;
-
-    // Clear existing page numbers
+    // Clear page numbers
     pageNumbers.innerHTML = '';
 
-    // Generate page number buttons
+    // Update button states
+    prevButton.disabled = currentPage <= 1;
+    nextButton.disabled = currentPage >= totalPages;
+
+    // Generate page numbers
     for (let i = 1; i <= totalPages; i++) {
         const pageButton = document.createElement('button');
-        pageButton.textContent = i;
-        pageButton.classList.add('page-button');
-        if (i === currentPage) {
-            pageButton.classList.add('active');
-        }
-        pageButton.onclick = () => fetchBooks(i);
+        pageButton.innerText = i;
+        pageButton.className = i === currentPage ? 'current-page' : '';
+        pageButton.addEventListener('click', () => fetchBooks(i));
         pageNumbers.appendChild(pageButton);
     }
 }
+
 
 
 
@@ -296,7 +291,7 @@ function handleOptionClick_user(element, option) {
     element.classList.add('active');
 
     // Redirect based on the selected option
-    switch(option) {
+    switch (option) {
         case 'Categories Database':
             window.location.href = 'http://127.0.0.1:8000/adminpanel/categories/';
             break;
@@ -313,11 +308,15 @@ function handleOptionClick_user(element, option) {
             window.location.href = 'http://127.0.0.1:8000/adminpanel/books/';
             break;
         case 'Log out':
-            // Handle log out functionality here
-            console.log('Logging out...');
+            // Signal logout across tabs using localStorage
+            localStorage.setItem('logout-event', 'logout' + Date.now());
+            window.location.href = "http://127.0.0.1:8000/adminpanel/logout/"; // Redirect to logout view
+            break;
+        default:
+            console.error('Unknown option:', option);
             break;
     }
-}
+}   
 
 
 function saveBookField(selectElement) {
@@ -751,19 +750,3 @@ function closeUploadForm() {
     document.getElementById('fileSizeLabel').textContent = 'No file selected';
     document.getElementById('imagePreview1').style.display = 'none';
 }
-
-function handleOptionClick_user(element, action) {
-    if (action === 'Log out') {
-        // Signal logout across tabs using localStorage
-        localStorage.setItem('logout-event', 'logout' + Date.now());
-        window.location.href = "adminpanel/logout/"; // Redirect to logout view
-    }
-}
-
-// Listen for logout events from other tabs
-window.addEventListener('storage', (event) => {
-    if (event.key === 'logout-event') {
-        // Redirect to login page if a logout event is detected
-        window.location.href = "adminpanel/logout/";
-    }
-});

@@ -484,7 +484,7 @@ document.addEventListener("DOMContentLoaded", function () {
             user_name: formData.get("user_name"),
             email: formData.get("email"),
             password: formData.get("password"),
-            reader_rank: formData.get("reader_rank") || "Bronze", // Default rank
+            reader_rank: formData.get("reader_rank") || "ROCKY", // Default rank
             reader_points: parseInt(formData.get("reader_points"), 10) || 0, // Default points
         };
 
@@ -495,7 +495,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         // Send POST request to add user
-        fetch("/adminpanel/add-user/", { // Adjusted URL
+        fetch("/adminpanel/add-user/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -511,19 +511,26 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .then(data => {
                 if (data.status === "success") {
+                    // Show success message as an alert
                     alert(data.message);
                     closeInsertForm();
                     window.location.reload();
                 } else {
-                    alert("Error: " + data.message);
+                    // Show error message as an alert
+                    if (data.message === "Email already exists in the database.") {
+                        alert("⚠️ Error: This email is already registered. Please use a different email.");
+                    } else {
+                        alert("⚠️ Error: " + data.message);
+                    }
                 }
             })
             .catch(error => {
                 console.error("Error adding user:", error);
-                alert("An error occurred while adding the user. Please try again.");
-            });        
+                alert("An error occurred while adding the user. Email already exists .");
+            });
     });
 });
+
 
 // Utility function to get CSRF token
 function getCookie(name) {
@@ -572,7 +579,7 @@ function handleOptionClick_user(element, option) {
     element.classList.add('active');
 
     // Redirect based on the selected option
-    switch(option) {
+    switch (option) {
         case 'Categories Database':
             window.location.href = 'http://127.0.0.1:8000/adminpanel/categories/';
             break;
@@ -589,24 +596,13 @@ function handleOptionClick_user(element, option) {
             window.location.href = 'http://127.0.0.1:8000/adminpanel/books/';
             break;
         case 'Log out':
-            // Handle log out functionality here
-            console.log('Logging out...');
+            // Signal logout across tabs using localStorage
+            localStorage.setItem('logout-event', 'logout' + Date.now());
+            window.location.href = "http://127.0.0.1:8000/adminpanel/logout/"; // Redirect to logout view
+            break;
+        default:
+            console.error('Unknown option:', option);
             break;
     }
-}
+}    
 
-function handleOptionClick_user(element, action) {
-    if (action === 'Log out') {
-        // Signal logout across tabs using localStorage
-        localStorage.setItem('logout-event', 'logout' + Date.now());
-        window.location.href = "adminpanel/logout/"; // Redirect to logout view
-    }
-}
-
-// Listen for logout events from other tabs
-window.addEventListener('storage', (event) => {
-    if (event.key === 'logout-event') {
-        // Redirect to login page if a logout event is detected
-        window.location.href = "adminpanel/logout/";
-    }
-});

@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
 
     // Fetch initial data when page loads
-    fetch(`/adminpanel/api/last-three-pending-books/`)
+    fetch(`/adminpanel/api/last-three-pending-books`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Failed to fetch notification');
@@ -181,34 +181,40 @@ function handleOptionClick_user(element, option) {
     element.classList.add('active');
 
     // Redirect based on the selected option
-    switch(option) {
+    switch (option) {
         case 'Categories Database':
-            window.location.href = '/adminpanel/categories/';
+            window.location.href = 'http://127.0.0.1:8000/adminpanel/categories/';
             break;
         case 'User Details':
-            window.location.href = '/adminpanel/user-details/';
+            window.location.href = 'http://127.0.0.1:8000/adminpanel/user-details/';
             break;
         case 'View Feedback':
-            window.location.href = '/adminpanel/feedback/';
+            window.location.href = 'http://127.0.0.1:8000/adminpanel/feedback/';
             break;
         case 'Notification':
-            window.location.href = '/adminpanel/notifications/';
+            window.location.href = 'http://127.0.0.1:8000/adminpanel/notifications/';
             break;
         case 'Book Section':
-            window.location.href = '/adminpanel/books/';
+            window.location.href = 'http://127.0.0.1:8000/adminpanel/books/';
             break;
         case 'Log out':
+            // Signal logout across tabs using localStorage
             localStorage.setItem('logout-event', 'logout' + Date.now());
-            window.location.href = "adminpanel/logout/"; // Redirect to logout view
+            window.location.href = "http://127.0.0.1:8000/adminpanel/logout/"; // Redirect to logout view
+            break;
+        default:
+            console.error('Unknown option:', option);
             break;
     }
-}
-
-
-// Listen for logout events from other tabs
-window.addEventListener('storage', (event) => {
-    if (event.key === 'logout-event') {
-        // Redirect to login page if a logout event is detected
-        window.location.href = "adminpanel/logout/";
-    }
+}   
+const dropdownOptions = document.querySelectorAll('.dropdown-user li');
+dropdownOptions.forEach(option => {
+    option.addEventListener('click', (event) => {
+        const selectedOption = option.textContent.trim(); // Get the clicked option text
+        console.log(`Clicked option: ${selectedOption}`); // Debugging log
+        handleOptionClick_user(selectedOption); // Call the function with the option
+    });
 });
+
+
+

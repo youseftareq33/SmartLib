@@ -172,48 +172,73 @@ dropdown_user.addEventListener('mouseleave', (event) => {
 });
 
 
+let currentPage = 1;
 
-function loadFeedback() {
-    fetch('/adminpanel/feedback/', { headers: { 'X-Requested-With': 'XMLHttpRequest' } }) // Ensures request is identified as AJAX
+function loadFeedback(page = 1) {
+    fetch(`/adminpanel/feedback/?page=${page}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error(`Failed to fetch feedback: ${response.statusText}`);
             }
             return response.json();
         })
         .then(data => {
-            console.log("Received data:", data);
             const feedbackContainer = document.getElementById('feedback');
-            feedbackContainer.innerHTML = ''; // Clear previous feedback items
+            const prevButton = document.getElementById('prevPage');
+            const nextButton = document.getElementById('nextPage');
+            const pageNumbers = document.getElementById('pageNumbers');
 
+            // Clear current feedback and pagination
+            feedbackContainer.innerHTML = '';
+            pageNumbers.innerHTML = '';
+
+            // Populate feedback items
             if (data.feedbacks && data.feedbacks.length > 0) {
                 data.feedbacks.forEach(feedback => {
-                    console.log("Feedback item:", feedback);
                     const feedbackElement = document.createElement('div');
                     feedbackElement.classList.add('feedback-item');
                     feedbackElement.innerHTML = `
                         <h3>User: ${feedback.user_name}</h3>
                         <p>Feedback: ${feedback.feedback_description}</p>
-                        <p>Time: ${feedback.feedback_time ? feedback.feedback_time : 'N/A'}</p>
+                        <p>Time: ${feedback.feedback_time}</p>
                     `;
                     feedbackContainer.appendChild(feedbackElement);
                 });
             } else {
                 feedbackContainer.innerHTML = '<p>No feedback available.</p>';
             }
+
+            // Update pagination controls
+            currentPage = data.current_page;
+
+            // Update Previous button
+            prevButton.disabled = !data.has_previous;
+
+            // Update Next button
+            nextButton.disabled = !data.has_next;
+
+            // Add page numbers
+            for (let i = 1; i <= data.total_pages; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.innerText = i;
+                pageButton.className = i === currentPage ? 'current-page' : '';
+                pageButton.onclick = () => loadFeedback(i);
+                pageNumbers.appendChild(pageButton);
+            }
         })
         .catch(error => {
-            console.error("Error loading feedback:", error);
+            console.error('Error loading feedback:', error);
             const feedbackContainer = document.getElementById('feedback');
             feedbackContainer.innerHTML = '<p>Error loading feedback. Please try again later.</p>';
         });
 }
 
-// Call loadFeedback when the page loads
+// Load feedback on page load
 document.addEventListener('DOMContentLoaded', () => {
     loadFeedback();
 });
-
 
 function setActive(button) {
     // Remove active class from all buttons
@@ -237,7 +262,7 @@ function handleOptionClick_user(element, option) {
     element.classList.add('active');
 
     // Redirect based on the selected option
-    switch(option) {
+    switch (option) {
         case 'Categories Database':
             window.location.href = 'http://127.0.0.1:8000/adminpanel/categories/';
             break;
@@ -254,25 +279,12 @@ function handleOptionClick_user(element, option) {
             window.location.href = 'http://127.0.0.1:8000/adminpanel/books/';
             break;
         case 'Log out':
-            // Handle log out functionality here
-            console.log('Logging out...');
+            // Signal logout across tabs using localStorage
+            localStorage.setItem('logout-event', 'logout' + Date.now());
+            window.location.href = "http://127.0.0.1:8000/adminpanel/logout/"; // Redirect to logout view
+            break;
+        default:
+            console.error('Unknown option:', option);
             break;
     }
-}
-
-
-function handleOptionClick_user(element, action) {
-    if (action === 'Log out') {
-        // Signal logout across tabs using localStorage
-        localStorage.setItem('logout-event', 'logout' + Date.now());
-        window.location.href = "adminpanel/logout/"; // Redirect to logout view
-    }
-}
-
-// Listen for logout events from other tabs
-window.addEventListener('storage', (event) => {
-    if (event.key === 'logout-event') {
-        // Redirect to login page if a logout event is detected
-        window.location.href = "adminpanel/logout/";
-    }
-});
+}   

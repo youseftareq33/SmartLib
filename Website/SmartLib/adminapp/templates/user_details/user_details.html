@@ -127,20 +127,34 @@
                             <td class="select-checkbox" style="display: none;">
                                 <input type="checkbox" class="reader-select" data-id="{{ reader.user.user_id }}">
                             </td>
-                            <td contenteditable="true" class="editable" data-field="user_name">{{ reader.user.user_name }}</td>
-                            <td contenteditable="true" class="editable" data-field="email">{{ reader.user.email }}</td>
-                            <td>{{ reader.user.last_login|date:"Y-m-d H:i:s" }}</td>
-                            <td contenteditable="true" class="editable" data-field="is_active">
+                            <td contenteditable="true" class="editable" data-field="user_name" 
+                                style="max-width: 150px; overflow-x: auto; white-space: nowrap;">
+                                {{ reader.user.user_name }}
+                            </td>
+                            <td contenteditable="true" class="editable" data-field="email" 
+                                style="max-width: 200px; overflow-x: auto; white-space: nowrap;">
+                                {{ reader.user.email }}
+                            </td>
+                            <td style="max-width: 150px; overflow-x: auto; white-space: nowrap;">
+                                {{ reader.user.last_login|date:"Y-m-d H:i:s" }}
+                            </td>
+                            <td contenteditable="true" class="editable" data-field="is_active" 
+                                style="max-width: 100px; overflow-x: auto; white-space: nowrap;">
                                 {{ reader.user.is_active|yesno:"Active,Inactive" }}
                             </td>
-                            <td data-field="reader_rank">
+                            <td data-field="reader_rank" 
+                                style="max-width: 100px; overflow-x: auto; white-space: nowrap;">
                                 <select class="rank-select" data-id="{{ reader.user.user_id }}">
+                                    <option value="ROCKY" {% if reader.reader_rank == "ROCKY" %}selected{% endif %}>ROCKY</option>
                                     <option value="Bronze" {% if reader.reader_rank == "Bronze" %}selected{% endif %}>Bronze</option>
                                     <option value="Silver" {% if reader.reader_rank == "Silver" %}selected{% endif %}>Silver</option>
                                     <option value="Gold" {% if reader.reader_rank == "Gold" %}selected{% endif %}>Gold</option>
                                 </select>
                             </td>
-                            <td contenteditable="true" class="editable" data-field="reader_point">{{ reader.reader_point }}</td>
+                            <td contenteditable="true" class="editable" data-field="reader_point" 
+                                style="max-width: 100px; overflow-x: auto; white-space: nowrap;">
+                                {{ reader.reader_point }}
+                            </td>
                         </tr>
                         {% endfor %}
                     {% else %}
@@ -150,6 +164,28 @@
                     {% endif %}
                 </tbody>
             </table>
+            <style>
+                /* Apply to all table cells with scrollbars */
+                .content-table td::-webkit-scrollbar {
+                    width: 8px; /* Scrollbar width */
+                }
+            
+                .content-table td::-webkit-scrollbar-thumb {
+                    background-color: #4c5fd1; /* Set the thumb color to blue */
+                    border-radius: 4px; /* Optional: Rounded corners for thumb */
+                }
+            
+                .content-table td::-webkit-scrollbar-thumb:hover {
+                    background-color: #4c5fd1; /* Darker blue on hover */
+                }
+            
+                .content-table td::-webkit-scrollbar-track {
+                    background: #f1f1f1; /* Optional: Track background color */
+                }
+            </style>
+            
+            
+            
             <div class="pagination">
                 {% if page_obj.has_previous %}
                 <a href="?page=1">&laquo; First</a>
@@ -185,7 +221,8 @@
         
                 <label for="readerRank">Reader Rank:</label>
                 <select id="readerRank" name="reader_rank">
-                    <option value="Bronze" selected>Bronze</option>
+                    <option value="ROCKY" selected>ROCKY</option>
+                    <option value="Bronze">Bronze</option>
                     <option value="Silver">Silver</option>
                     <option value="Gold">Gold</option>
                 </select>

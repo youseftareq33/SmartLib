@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'smartlib_api',
-    'adminapp'
+    'adminapp',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +50,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'smartlib_api.middleware.MediaFileMiddleware',
+    'adminapp.middleware.MediaFileMiddleware',
 ]
 
 ROOT_URLCONF = 'SmartLib.urls'

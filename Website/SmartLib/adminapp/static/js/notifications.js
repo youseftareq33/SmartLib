@@ -263,7 +263,7 @@ function handleOptionClick_user(element, option) {
     element.classList.add('active');
 
     // Redirect based on the selected option
-    switch(option) {
+    switch (option) {
         case 'Categories Database':
             window.location.href = 'http://127.0.0.1:8000/adminpanel/categories/';
             break;
@@ -280,24 +280,13 @@ function handleOptionClick_user(element, option) {
             window.location.href = 'http://127.0.0.1:8000/adminpanel/books/';
             break;
         case 'Log out':
-            // Handle log out functionality here
-            console.log('Logging out...');
+            // Signal logout across tabs using localStorage
+            localStorage.setItem('logout-event', 'logout' + Date.now());
+            window.location.href = "http://127.0.0.1:8000/adminpanel/logout/"; // Redirect to logout view
+            break;
+        default:
+            console.error('Unknown option:', option);
             break;
     }
-}
+}   
 
-function handleOptionClick_user(element, action) {
-    if (action === 'Log out') {
-        // Signal logout across tabs using localStorage
-        localStorage.setItem('logout-event', 'logout' + Date.now());
-        window.location.href = "adminpanel/logout/"; // Redirect to logout view
-    }
-}
-
-// Listen for logout events from other tabs
-window.addEventListener('storage', (event) => {
-    if (event.key === 'logout-event') {
-        // Redirect to login page if a logout event is detected
-        window.location.href = "adminpanel/logout/";
-    }
-});

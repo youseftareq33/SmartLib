@@ -7,7 +7,7 @@ from django.conf.urls.static import static
 
 
 urlpatterns = [
-    path('', manager_login, name='manager_login'),
+    path('login/', manager_login, name='manager_login'),
     path('logout/', logout_user, name='logout'),
     path('adminpanel/logout/', logout_user, name='logout'),
 
@@ -69,6 +69,3 @@ urlpatterns = [
     
 
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

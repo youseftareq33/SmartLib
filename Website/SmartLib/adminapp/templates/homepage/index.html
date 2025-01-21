@@ -6,7 +6,7 @@
     <title>Manager Page</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/index.css' %}">
-    <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}" sizes="32x32">
+    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
 
 </head>
 <body>
@@ -70,19 +70,19 @@
     </header>
     <div class="container">
         <nav class="sidebar">
-            <button onclick="window.location.href='/adminpanel/categories/'">
+            <button onclick="window.location.href='http://127.0.0.1:8000/adminpanel/categories/'">
                 Categories Database
             </button>
-            <button onclick="window.location.href='/adminpanel/user-details/'">
+            <button onclick="window.location.href='http://127.0.0.1:8000/adminpanel/user-details/'">
                 User Details
             </button>
-            <button onclick="window.location.href='/adminpanel/feedback/'">
+            <button onclick="window.location.href='http://127.0.0.1:8000/adminpanel/feedback/'">
                 View Feedback
             </button>
-            <button onclick="window.location.href='/adminpanel/notifications/'">
+            <button onclick="window.location.href='http://127.0.0.1:8000/adminpanel/notifications/'">
                 Notifications
             </button>
-            <button onclick="window.location.href='/adminpanel/books/'">
+            <button onclick="window.location.href='http://127.0.0.1:8000/adminpanel/books/'">
                 Book Section
             </button>
         </nav>

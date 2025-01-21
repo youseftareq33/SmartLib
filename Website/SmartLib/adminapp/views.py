@@ -32,7 +32,8 @@ def categories(request):
     categories = Category.objects.all()
     return render(request, 'categories/categories.html', {'categories': categories})
 
-#add
+
+
 @csrf_exempt
 def add_category(request):
     """Handle adding a new category."""
@@ -44,12 +45,18 @@ def add_category(request):
             if not category_name:
                 return JsonResponse({'status': 'error', 'message': 'Category name is required.'}, status=400)
 
+            # Check if the category already exists
+            if Category.objects.filter(category_name=category_name).exists():
+                return JsonResponse({'status': 'error', 'message': 'Category already exists.'}, status=400)
+
+            # Create the new category
             category = Category.objects.create(category_name=category_name)
             return JsonResponse({'status': 'success', 'message': 'Category added successfully!', 'category_id': category.category_id})
 
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+
 
 
 # delete  
@@ -70,23 +77,31 @@ def delete_categories(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 #------------------------------------------#------------------------------------------#------------------------------------------
 
-#get feedback
-@manager_login_required
 def feedback(request):
-    if request.method == 'GET' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        # Return feedback data as JSON for AJAX requests
-        feedbacks = FeedBack.objects.all().select_related('reader__user')
+    # Fetch all feedback data
+    feedbacks = FeedBack.objects.all().select_related('reader__user')
+    paginator = Paginator(feedbacks, 2)  # Display 2 feedbacks per page
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':  # AJAX Request
         feedback_list = [
             {
                 'user_name': feedback.reader.user.user_name,
                 'feedback_description': feedback.feedback_description,
-                'feedback_time': feedback.feedback_time.strftime('%Y-%m-%d %H:%M:%S') if feedback.feedback_time else None
+                'feedback_time': feedback.feedback_time.strftime('%Y-%m-%d %H:%M:%S') if feedback.feedback_time else 'N/A'
             }
-            for feedback in feedbacks
+            for feedback in page_obj
         ]
-        return JsonResponse({'feedbacks': feedback_list})
+        return JsonResponse({
+            'feedbacks': feedback_list,
+            'has_previous': page_obj.has_previous(),
+            'has_next': page_obj.has_next(),
+            'current_page': page_obj.number,
+            'total_pages': paginator.num_pages,
+        })
 
-    return render(request, 'feedback/feedback.html')
+    return render(request, 'feedback/feedback.html', {'feedbacks': page_obj})
 #------------------------------------------#------------------------------------------#------------------------------------------
 
 
@@ -114,26 +129,27 @@ def user_details(request):
         'query': query,  
     })
 
-
-# add user (add reader)
 @csrf_exempt
 def add_user(request):
     if request.method == 'POST':
         try:
-
             data = json.loads(request.body)
             user_name = data.get('user_name')
             email = data.get('email')
             password = data.get('password')
 
-            is_active = False 
-
-            reader_rank = data.get('reader_rank', 'Bronze')
+            is_active = False  # Set default value for is_active
+            reader_rank = data.get('reader_rank', 'ROCKY')
             reader_points = data.get('reader_points', 0)
 
             if not user_name or not email or not password:
                 return JsonResponse({'status': 'error', 'message': 'Missing required fields.'}, status=400)
 
+            # Check if the email already exists in the User table
+            if User.objects.filter(email=email).exists():
+                return JsonResponse({'status': 'error', 'message': 'Email already exists in the database.'}, status=400)
+
+            # Create the User
             user = User.objects.create(
                 user_name=user_name,
                 email=email,
@@ -141,6 +157,7 @@ def add_user(request):
                 is_active=is_active  
             )
 
+            # Create the Reader
             reader = Reader.objects.create(
                 user=user,
                 reader_rank=reader_rank,
@@ -150,7 +167,6 @@ def add_user(request):
             return JsonResponse({'status': 'success', 'message': 'User and Reader added successfully!'})
 
         except Exception as e:
-
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
@@ -171,7 +187,7 @@ def deactivate_reader(request, user_id):
 
         try:
             reader = Reader.objects.get(user=user)
-            reader.reader_rank = 'Bronze'
+            reader.reader_rank = 'ROCKY'
             reader.reader_point = 0
             reader.is_first_time = True
             reader.save()
@@ -220,7 +236,7 @@ def update_reader(request):
 
         # Handle reader-specific fields
         if field in ['reader_rank', 'reader_point', 'is_first_time']:
-            if field == 'reader_rank' and value not in ['Bronze', 'Silver', 'Gold']:
+            if field == 'reader_rank' and value not in ['ROCKY','Bronze', 'Silver', 'Gold']:
                 return JsonResponse({'status': 'error', 'message': 'Invalid rank value'}, status=400)
 
             if field == 'reader_point':
@@ -373,9 +389,7 @@ def manager_login(request):
             user = User.objects.get(user_name=username)
 
             # Check if the password matches
-            if not bcrypt.checkpw(password.encode('utf-8'), user.user_password.encode('utf-8')):
-               messages.error(request, "Invalid username or password.")
-            else:
+            if bcrypt.checkpw(password.encode('utf-8'), user.user_password.encode('utf-8')):
                 # Ensure the user is a manager
                 if Manager.objects.filter(user=user).exists():
                     # Login successful
@@ -384,7 +398,9 @@ def manager_login(request):
                     return redirect('index')  # Use the name of the path
                 else:
                     messages.error(request, "You are not authorized as a manager.")
-        except:
+            else:
+                messages.error(request, "Invalid username or password.")
+        except User.DoesNotExist:
             messages.error(request, "User does not exist.")
 
     return render(request, 'login/login.html')  # Render login page for GET request or invalid login

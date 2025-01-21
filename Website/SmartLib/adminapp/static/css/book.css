@@ -509,6 +509,13 @@ button:hover {
     display: flex;
     gap: 5px;
 }
+/* Scrollable table cells */
+.scrollable-cell {
+    max-height: 100px; /* Set maximum height for the cell */
+    overflow-y: auto; /* Enable vertical scrolling */
+    word-wrap: break-word; /* Wrap long text */
+}
+
 
 .page-button {
     padding: 8px 12px;
