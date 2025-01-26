@@ -26,6 +26,7 @@ urlpatterns = [
     path('accountSettingsPage', AccountSettingsPage, name='accountSettingsPage'), 
     path('remove_uploaded_book/', RemoveUploadedBookView.as_view(), name='remove_uploaded_book'),
     path('viewBookPage/<int:book_id>/', ViewBookPage, name='ViewBookPage'),
+    path('OpenBookPage/<int:book_id>/', OpenBookPage, name='OpenBookPage'),
     path('login-api', UserLoginView.as_view()),
     path('change-password-api', UserChangePasswordView.as_view()),
     path('delete-user-api', DeleteUser.as_view()), 
@@ -60,4 +61,7 @@ urlpatterns = [
     path('InsertFeedbackView/', InsertFeedbackView.as_view()),
     path('getUploadedBookListView/', UploadedBookListView.as_view()),
     path('insertBook/', CreateBookView.as_view()),
+    path('summarize/', summarize_text, name='summarize_text'),
+    path('translate/', translate_text, name='translate_text'),
+    path('text_to_speech/', text_to_speech, name='text_to_speech'),
 ]

@@ -91,6 +91,9 @@ def AccountSettingsPage(request):
 def ViewBookPage(request, book_id):
     return render(request, '12_viewBook_page.html', {'book_id': book_id})
 
+def OpenBookPage(request, book_id):
+    return render(request, '14_openBook_page.html', {'book_id': book_id})
+
 def GuestSearchPage(request):
     search = request.GET.get('search', '')  # Retrieve search from query parameters
     return render(request, '1_4_guestSearch_page.html', {'search': search})
@@ -1100,3 +1103,111 @@ class DeleteUser(APIView):
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
         
+
+#---------------------------------------------------------------------------------------------------
+
+#-- book feature:
+
+#-- text summarize
+import json
+from sumy.parsers.plaintext import PlaintextParser # pip install sumy, pip install nltk
+from sumy.nlp.tokenizers import Tokenizer
+from sumy.summarizers.text_rank import TextRankSummarizer
+
+
+def summarize_text(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            selected_text = data.get('text', '')
+
+            if not selected_text:
+                return JsonResponse({'error': 'No text provided for summarization.'}, status=400)
+
+            # Parse the input text
+            parser = PlaintextParser.from_string(selected_text, Tokenizer("english"))
+
+            # Use TextRankSummarizer from sumy
+            summarizer = TextRankSummarizer()
+            summary_sentences = summarizer(parser.document, 2)  # Generate up to 2 summary sentences
+
+            # Combine the sentences into a single string
+            summary = ' '.join(str(sentence) for sentence in summary_sentences)
+
+            return JsonResponse({'result': summary})
+        
+        except Exception as e:
+            return JsonResponse({'error': f'Summarization failed: {str(e)}'}, status=500)
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
+#-- translate text to arabic
+
+import json
+from googletrans import Translator  # pip install googletrans==4.0.0-rc1
+from django.http import JsonResponse
+
+# Ensure that the translate function is asynchronous
+async def translate_text(request):
+    if request.method == 'POST':
+        try:
+            # Parse the request body
+            data = json.loads(request.body)
+            text = data.get('text', '').strip()
+
+            # Validate the input text
+            if not text:
+                return JsonResponse({'error': 'Text field is required and cannot be empty.'}, status=400)
+
+            # Initialize the translator
+            translator = Translator()
+
+            # Await the translation as it's asynchronous
+            translated_text = (await translator.translate(text, dest='ar')).text
+            return JsonResponse({'result': translated_text})
+        except Exception as e:
+            print(f"Translation error: {e}")
+            return JsonResponse({'error': 'Translation failed.'}, status=500)
+    
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
+
+
+#-- text to speech
+from gtts import gTTS # pip install gtts (google text to speech)
+from io import BytesIO
+import pygame # pip install pygame
+import tempfile
+
+def text_to_speech(request):
+    if request.method == 'POST':
+        # Parse the request body to get the text
+        data = json.loads(request.body)
+        text = data.get('text', '')
+
+        try:
+            # Convert text to speech
+            tts = gTTS(text)
+            audio_stream = BytesIO()
+            tts.write_to_fp(audio_stream)
+            audio_stream.seek(0)
+
+            # Save to a temporary file
+            with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as temp_audio_file:
+                temp_audio_file.write(audio_stream.read())
+                temp_audio_path = temp_audio_file.name
+
+            # Initialize pygame and play the audio
+            pygame.mixer.init()
+            pygame.mixer.music.load(temp_audio_path)
+            pygame.mixer.music.play()
+
+            # Return a success response
+            return JsonResponse({'message': 'Audio is playing successfully.'})
+        except Exception as e:
+            print(f"Error: {e}")
+            return JsonResponse({'error': 'Failed to convert text to speech.'}, status=500)
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)

@@ -41,21 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
             fetch(`/get_book_info/?book_id=${book_id}`)
                 .then(response => response.json())
                 .then(data => {
-                    if (data) {
-                        document.getElementById('title').textContent = data.book_name;
-                        document.getElementById('author').textContent = `Author: ${data.book_author || 'No Author'}`;
-                        document.getElementById('category').textContent = `Category: ${data.book_type || 'No Category'}`;
-                        document.getElementById('rating').textContent = `Rating: ${'⭐'.repeat(data.book_rating_avg || 0)}`;
-                        const bookImage = document.getElementById('book_img');
-                        if (data.book_image) {
-                            bookImage.src = data.book_image;
-                        }
-
-
-                        document.getElementById('description').textContent = data.book_description;
-
+                    if (data && data.book_file) {
+                        document.getElementById('book_pdf').src = data.book_file;
                     } else {
-                        console.error("Book not found");
+                        console.error("Book not found or no book file available.");
                     }
                 })
                 .catch(error => {
@@ -611,256 +600,46 @@ document.getElementById("sendFeedback").onclick = function() {
 }
 
 //-----------------------------------------------------
-// Open Book
 
-document.getElementById('open_book').addEventListener('click', () => {
-    window.location.href = `/OpenBookPage/${book_id}`;
-});
+// book feature
+function performFeature(feature) {
+    let text = '';
+    let textareaId = '';
 
-//-----------------------------------------------------
-// Stars Rating
+    if (feature === 'text_to_speech') {
+        textareaId = 'tts-text';
+        text = document.getElementById(textareaId).value;
+    } else if (feature === 'translate') {
+        textareaId = 'translate-text';
+        text = document.getElementById(textareaId).value;
+    } else if (feature === 'summarize') {
+        textareaId = 'summarize-text';
+        text = document.getElementById(textareaId).value;
+    }
 
-const stars = document.querySelectorAll('.star');
-const star_num = document.getElementById('star_num');
-let star_numbers = 0;
-let timeout_star_num; // Variable to store the timeout ID
+    if (!text) {
+        alert("Please paste text into the box to use this feature.");
+        return;
+    }
 
-stars.forEach((star, index) => {
-    // Hover effect
-    star.addEventListener('mouseover', function () {
-        clearTimeout(timeout_star_num); // Clear any previous timeout
-        resetStars();
-        highlightStars(index);
-        star_num.textContent = (index + 1) + " Stars"; // Update the text inside <p>
-    });
-
-    // Remove hover effect when the mouse leaves
-    star.addEventListener('mouseout', function () {
-        resetStars();
-        const activeStars = document.querySelectorAll('.star.active');
-        activeStars.forEach((s, i) => highlightStars(i));
-
-        if (activeStars.length > 0) {
-            star_num.textContent = activeStars.length + " Stars"; // Keep the active star count
+    fetch(`/${feature}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text: text })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (feature === 'text_to_speech') {
+            const audio = new Audio(data.audio_url);
+            audio.play();
         } else {
-            // Delay the reset by 0.5 seconds
-            timeout_star_num = setTimeout(() => {
-                star_num.textContent = ""; // Reset to empty after 0.5s
-            }, 180);
+            document.getElementById(textareaId).value = data.result;
         }
-    });
-
-    // Click event to select the rating
-    star.addEventListener('click', function () {
-        clearTimeout(timeout_star_num); // Clear any previous timeout
-        stars.forEach(s => s.classList.remove('active'));
-        highlightStars(index);
-        stars.forEach((s, i) => {
-            if (i <= index) {
-                s.classList.add('active');
-            }
-        });
-
-        const rating = index + 1; // Index starts from 0, so add 1
-        star_num.textContent = rating + " Stars"; // Update the text after selection
-        star_numbers = rating;
-    });
-});
-
-// Helper function to highlight stars
-function highlightStars(index) {
-    for (let i = 0; i <= index; i++) {
-        stars[i].style.color = '#FFD700'; // Golden color for highlighted stars
-    }
-}
-
-// Helper function to reset stars color
-function resetStars() {
-    stars.forEach(star => {
-        star.style.color = '#ddd'; // Reset to grey
-    });
-}
-
-// --------------------------------------------
-
-//- submit rate and review:
-const review_input = document.getElementById('review_input');
-const submit_review_btn = document.getElementById('submit_review_btn');
-const error_msg = document.getElementById('error');
-
-submit_review_btn.addEventListener('click', async (event) => {
-    event.preventDefault();
-    error_msg.style.display = "none";
-
-    if (review_input.value === "" || star_numbers === 0) {
-        error_msg.textContent = "Please fill all fields.";
-        error_msg.style.color = "red";
-        error_msg.style.display = 'block';
-    } else {
-        const response = await fetch('/insertRatingAndReview/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                book_id: book_id,
-                user_id: userId,
-                rating: star_numbers,
-                review: review_input.value
-            })
-        });
-
-        if (!response.ok) {
-            const data = await response.json();
-            error_msg.textContent = data.error || "An unexpected error occurred.";
-            error_msg.style.color = "red";
-            error_msg.style.display = "block";
-        } else {
-            // Success: reset the input and stars
-            error_msg.style.display = "none";
-            review_input.value = "";
-            star_numbers = 0;
-            star_num.textContent = ""; // Reset star_num text
-            resetStars(); // Reset star styles to default
-            stars.forEach(star => star.classList.remove('active')); // Remove active class from all stars
-            location.reload();
-        }
-    }
-});
-
-
-//------------------------------------------------------
-
-// review comment:
-
-let currentData=null;
-
-document.addEventListener('DOMContentLoaded', () => {
-    const mission_prev = document.getElementById('mission_prev');
-    const mission_next = document.getElementById('mission_next');
-
-    const user_rate_container_1 = document.getElementById('user_rate_container_1');
-    const user_rate_container_2 = document.getElementById('user_rate_container_2');
-    const user_rate_container_3 = document.getElementById('user_rate_container_3');
-
-
-    user_rate_container_1.style.display='none';
-    user_rate_container_2.style.display='none';
-    user_rate_container_3.style.display='none';
-
-    // Fetch initial data when page loads
-    fetch(`/list_Three-rating_and_review?book_id=${book_id}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to fetch Comment');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if(data.count === 0){
-                mission_prev.style.display = 'none';
-                mission_next.style.display = 'none';
-            }
-            else{
-            currentData = data; // Store the fetched data
-            updateCommentDetails(data); // Update the Comment details initially
-
-            // Event listener for "Previous" button
-            mission_prev.addEventListener('click', (event) => {
-                event.preventDefault(); 
-                if (currentData.previous) {
-                    loadComment(currentData.previous); 
-                }
-            });
-
-            // Event listener for "Next" button
-            mission_next.addEventListener('click', (event) => {
-                event.preventDefault(); 
-                if (currentData.next) {
-                    loadComment(currentData.next); 
-                }
-            });
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching Comment', error);
-        });
-
-});
-
-
-// Function to load comment based on the next or previous URL
-function loadComment(url) {
-    fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to load comment');
-            }
-            return response.json();
-        })
-        .then(data => {
-            currentData = data; 
-            updateCommentDetails(data); 
-        })
-        .catch(error => {
-            console.error('Error loading comment', error);
-        });
-}
-
-// Function to update book details and pagination buttons
-function updateCommentDetails(data) {
-    const mission_prev = document.querySelector('#mission_prev img');
-    const mission_next = document.querySelector('#mission_next img');
-
-    const user_rate_container_1 = document.getElementById('user_rate_container_1');
-    const user_rate_container_2 = document.getElementById('user_rate_container_2');
-    const user_rate_container_3 = document.getElementById('user_rate_container_3');
-
-    user_rate_container_1.style.display='none';
-    user_rate_container_2.style.display='none';
-    user_rate_container_3.style.display='none';
-
-
-    // Show or hide pagination buttons based on available data
-    if (data.previous == null && data.next == null) {
-        mission_prev.src = '/static/images/prev_page_empty.png';
-        mission_next.src = '/static/images/next_page_empty.png';
-    } else if (data.previous == null && data.next != null) {
-        mission_prev.src = '/static/images/prev_page_empty.png';
-        mission_next.src = '/static/images/next_page.png';
-    } else if (data.previous != null && data.next == null) {
-        mission_prev.src = '/static/images/prev_page.png';
-        mission_next.src = '/static/images/next_page_empty.png';
-    } else {
-        mission_prev.src = '/static/images/prev_page.png';
-        mission_next.src = '/static/images/next_page.png';
-    }
-
-    // Update the comment details dynamically
-    data.results.forEach((comment, index) => {
-        const user_rate_container_userName = document.getElementById(`rate_container_user_name_${index + 1}`);
-        const user_rate_container_stars = document.getElementById(`rate_container_stars_${index + 1}`);
-        const user_rate_container_desc = document.getElementById(`rate_container_description_${index + 1}`);
-
-        const user_rate_container_Item = document.getElementById(`user_rate_container_${index + 1}`);
-
-        // If there is data for the mission, display the mission item
-        if (comment) {
-            user_rate_container_Item.style.display = 'block'; // Make the mission item visible
-
-            user_rate_container_userName.textContent = comment.user_name || 'User';
-
-            const rating = comment.rating || 0; // Get the rating (default to 0 if not available)
-            const stars = '⭐'.repeat(rating); // Create a string of stars based on the rating
-            user_rate_container_stars.textContent = `${stars} ${rating} Stars`;
-
-            user_rate_container_desc.textContent = comment.review || 'No review provided';
-            
-            
-        } 
-        else {
-            // If no data for the mission, hide the mission item
-            mission_Item.style.display = 'none';
-        }
+    })
+    .catch(error => {
+        console.error("Error processing the text:", error);
+        alert("There was an error processing the text.");
     });
 }
