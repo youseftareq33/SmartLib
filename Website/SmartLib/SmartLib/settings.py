@@ -90,9 +90,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'smartlibpro@gmail.com'
-EMAIL_HOST_PASSWORD = 'vgkm loeg ewoj akxx' 
-DEFAULT_FROM_EMAIL = 'smartlibpro@gmail.com'
+EMAIL_HOST_USER = 'smartlib120@gmail.com'
+EMAIL_HOST_PASSWORD = 'gifs jlcb ecrv eczv' 
+DEFAULT_FROM_EMAIL = 'smartlib120@gmail.com'
 
 
 WSGI_APPLICATION = 'SmartLib.wsgi.application'

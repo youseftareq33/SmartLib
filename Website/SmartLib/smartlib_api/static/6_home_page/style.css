@@ -922,10 +922,20 @@ footer .right .social i{
     font-size: 30px;
     cursor: pointer;
     transition: color 0.3s ease;
+    color: #ffffff;
 }
 
 footer .right .social i:hover{
     color: #3f48cc;
+}
+
+.x-link svg {
+    fill: white; /* Default color */
+    transition: fill 0.3s ease; /* Smooth color transition */
+}
+
+.x-link:hover svg {
+    fill: #3f48cc; /* Change color on hover */
 }
 
 footer .right p{

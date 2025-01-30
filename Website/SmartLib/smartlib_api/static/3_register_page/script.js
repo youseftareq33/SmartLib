@@ -61,7 +61,6 @@ register_btn.addEventListener('click', async (event) => {
 });
 
 async function onSubmit(token) {
-    console.log("enter");
     if(!hasErrors){
         const response = await fetch('/register-api', {
             method: 'POST',

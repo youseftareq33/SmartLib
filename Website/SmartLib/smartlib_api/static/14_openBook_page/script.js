@@ -601,6 +601,54 @@ document.getElementById("sendFeedback").onclick = function() {
 
 //-----------------------------------------------------
 
+const sider_Button = document.getElementById('tools_image');
+const toolsText = document.getElementById('tools_text');
+const toolsFeature = document.getElementById('tools_fet');
+
+toolsText.style.visibility = "hidden"; // Initially hide the text
+toolsFeature.style.display="none";
+
+// Event listener for when mouse enters the dropdown
+sider_Button.addEventListener('mouseenter', () => {
+    toolsText.style.visibility = "visible";
+});
+
+// Event listener for when mouse leaves the categories button
+sider_Button.addEventListener('mouseleave', () => {
+    toolsText.style.visibility = "hidden"; 
+});
+
+let isSiderOpen=false;
+
+sider_Button.onclick = function() {
+    const topContainer = document.querySelector('.top_container');
+    
+    // Check if padding-left is '25%' using computed style
+    if (isSiderOpen==false) {
+        isSiderOpen=true;
+        topContainer.style.paddingLeft = '0%';
+        document.querySelector('.top_container .pdf-viewer').style.width = '60%';
+        document.querySelector('.top_container .tools_container img').style.alignSelf="end";
+        sider_Button.style.transform = "rotate(90deg)";
+        sider_Button.style.transition = "transform 0.3s ease";
+        toolsText.style.display = "none";
+        toolsFeature.style.display="flex";
+    } else{
+        isSiderOpen=false;
+        topContainer.style.paddingLeft = '25%';
+        document.querySelector('.top_container .pdf-viewer').style.width = '70%';
+        document.querySelector('.top_container .tools_container img').style.alignSelf="center";
+        sider_Button.style.transform = "rotate(0deg)";
+        sider_Button.style.transition = "transform 0.3s ease";
+        toolsText.style.display = "flex";
+        toolsFeature.style.display="none";
+    }
+};
+
+
+
+
+
 // book feature
 function performFeature(feature) {
     let text = '';
