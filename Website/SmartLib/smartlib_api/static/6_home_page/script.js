@@ -706,28 +706,36 @@ document.addEventListener('DOMContentLoaded', () => {
             return response.json();
         })
         .then(data => {
-            currentData = data; // Store the fetched data
-            updateBookDetails(data); // Update the book details initially
+            if(data.count>0){
+                document.getElementById('continue-reading-book-container').style.display="flex";
 
-            // Event listener for "Previous" button
-            book_continue_prev.addEventListener('click', (event) => {
-                event.preventDefault(); // Prevent the default anchor behavior
-                console.log("prev: "+currentData.previous);
-                if (currentData.previous) {
-                    curr_url_continue=currentData.previous;
-                    loadBooks(curr_url_continue); // Load books for the previous page
-                }
-            });
+                currentData = data; // Store the fetched data
+                updateBookDetails(data); // Update the book details initially
 
-            // Event listener for "Next" button
-            book_continue_next.addEventListener('click', (event) => {
-                event.preventDefault(); // Prevent the default anchor behavior
-                console.log("next: "+currentData.next);
-                if (currentData.next) {
-                    curr_url_continue=currentData.next;
-                    loadBooks(curr_url_continue); // Load books for the next page
-                }
-            });
+                // Event listener for "Previous" button
+                book_continue_prev.addEventListener('click', (event) => {
+                    event.preventDefault(); // Prevent the default anchor behavior
+                    console.log("prev: "+currentData.previous);
+                    if (currentData.previous) {
+                        curr_url_continue=currentData.previous;
+                        loadBooks(curr_url_continue); // Load books for the previous page
+                    }
+                });
+
+                // Event listener for "Next" button
+                book_continue_next.addEventListener('click', (event) => {
+                    event.preventDefault(); // Prevent the default anchor behavior
+                    console.log("next: "+currentData.next);
+                    if (currentData.next) {
+                        curr_url_continue=currentData.next;
+                        loadBooks(curr_url_continue); // Load books for the next page
+                    }
+                });
+            }
+            else{
+                document.getElementById('continue-reading-book-container').style.display="none";
+            }
+            
         })
         .catch(error => {
             console.error('Error fetching continue reading books:', error);

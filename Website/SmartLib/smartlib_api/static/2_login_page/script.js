@@ -36,7 +36,39 @@ login_btn.addEventListener('click', async (event) => {
             const data = await response.json();
             localStorage.setItem('jwt_token', data.jwt); // Store the token in local storage
 
-            window.location.href = '/homePage';
+            // Decode the JWT token to get the user data
+            const decodedToken = jwt_decode(data.jwt);
+            userId = decodedToken.id; // Extract the user ID
+
+            fetch(`/get_reader_info?user_id=${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data) {
+                    if(data.is_first_time==true){
+                        fetch(`/update_isFirstTime`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({user_id: userId})
+                        }).then(() => {
+                            window.location.href = "/preferencesPage";
+                        }).catch(error => {
+                            console.error("Error updating is_first_time:", error);
+                        });
+                    }
+                    else{
+                        window.location.href = '/homePage';
+                    }
+                    
+                } else {
+                    console.error("Reader not found");
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching Reader:", error);
+            });
+
             error_msg.textContent = "Login Successfully";
             error_msg.style.color = "green";
             error_msg.style.display = 'block';

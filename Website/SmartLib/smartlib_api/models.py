@@ -26,7 +26,7 @@ class Reader(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='user_id')
     reader_rank = models.CharField(max_length=20, default='Rookie')
     reader_point = models.IntegerField(default=0)
-    is_first_time = models.BooleanField(default=False)
+    is_first_time = models.BooleanField(default=True)
     class Meta:
         db_table = 'Reader'  
         unique_together = (('reader_id', 'user'),)  

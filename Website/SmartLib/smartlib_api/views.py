@@ -60,6 +60,10 @@ def confirm_email_register(request):
     email = request.GET.get('email', '')  # Retrieve email from query parameters
     return render(request, '4_1_confirm_email_register_page.html', {'email': email})
 
+def preferencesPage(request):
+    categories = Category.objects.all()  
+    return render(request, '4_3_preferences_page.html', {'Category': categories})
+
 def findAccountPage(request):
     return render(request, '5_1_find_account_forgetPass_page.html')
 
@@ -393,6 +397,47 @@ class UserChangePasswordView(APIView):
 
         except User.DoesNotExist:
             raise AuthenticationFailed("User not found!", status=status.HTTP_404_NOT_FOUND)
+        
+
+class UpdateReaderIsFirstTime(APIView):
+    def post(self, request):
+        try:
+            user_id = request.data.get("user_id")
+
+            reader = Reader.objects.filter(user_id=user_id).first() 
+            if reader:
+                reader.is_first_time = False
+                reader.save()
+                return JsonResponse({"message": "Updated successfully"}, status=200)
+            else:
+                return JsonResponse({"error": "Reader not found"}, status=404)
+        
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+        
+def save_preferences(request):
+    if request.method == "POST":
+        user_id = request.POST.get("user_id")
+        category_ids = request.POST.get("preferences")  # Multiple categories
+
+        if not user_id or not category_ids:
+            return JsonResponse({'error': 'User ID or categories not provided'}, status=400)
+
+        category_ids = category_ids.split(',')  # Convert string to list
+
+        reader = Reader.objects.filter(user_id=user_id).first()
+        if not reader:
+            return JsonResponse({'error': 'User not found'}, status=404)
+
+        # Save multiple selected categories
+        Preferences.objects.filter(reader_id=reader.reader_id).delete()  # Clear old preferences
+        Preferences.objects.bulk_create([
+            Preferences(reader_id=reader.reader_id, category_id=cat_id) for cat_id in category_ids
+        ])
+
+        return JsonResponse({'message': 'Preferences saved successfully'}, status=200)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
 #--------------------------------------------------------------------------------------------
 
 
