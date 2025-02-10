@@ -20,6 +20,7 @@ urlpatterns = [
     path('resetPasswordPage/<str:email>/', resetPasswordPage, name='resetPasswordPage'),
     path('preferencesPage', preferencesPage, name='preferencesPage'), 
     path('save_preferences/', save_preferences, name='save_preferences'),
+    path('user_preferences/<int:user_id>/', UserPreferencesView.as_view(), name='user_preferences'),
     path('update_isFirstTime', UpdateReaderIsFirstTime.as_view(), name='update_isFirstTime'), 
     path('homePage', homePage, name='homePage'), 
     path('rankPage', RankPage, name='rankPage'),

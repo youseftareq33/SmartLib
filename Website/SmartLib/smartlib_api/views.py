@@ -90,7 +90,8 @@ def MyUploadedBookPage(request):
     return render(request, '10_myUploadedBook_page.html')
 
 def AccountSettingsPage(request):
-    return render(request, '11_accountSettings_page.html')
+    categories = Category.objects.all()  
+    return render(request, '11_accountSettings_page.html', {'Category': categories})
 
 def ViewBookPage(request, book_id):
     return render(request, '12_viewBook_page.html', {'book_id': book_id})
@@ -447,6 +448,22 @@ class CategoryListView(APIView):
         categories = Category.objects.all()
         serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+#-- list category by user id
+class UserPreferencesView(APIView):
+    def get(self, request, user_id):
+        reader = Reader.objects.filter(user_id=user_id).first()
+        if not reader:
+            return Response({'error': 'User not found'}, status=404)
+        
+        preferences = Preferences.objects.filter(reader_id=reader.reader_id).select_related('category')
+
+        data = [
+            {"category_id": pref.category.category_id}  # Use the correct field
+            for pref in preferences
+        ]
+        
+        return Response({"preferences": data})
 
 #--------------------------------------------------------------------------------------------
 

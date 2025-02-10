@@ -569,8 +569,11 @@ document.getElementById("sendFeedback").onclick = function() {
 
     // Ensure feedback text is not empty
     if (feedbackText.trim() === '') {
-        alert("Please write some feedback before sending.");
+        document.getElementById("feedbackText").style.borderColor = "red";
         return;
+    }
+    else{
+        document.getElementById("feedbackText").style.borderColor = "";
     }
 
     // Log the data to verify it's being sent correctly
@@ -595,34 +598,53 @@ document.getElementById("sendFeedback").onclick = function() {
 
     // Close the feedback stack after sending feedback
     document.getElementById("feedback-stack").style.display = "none";
-
-    // Clear the feedback textarea
     document.getElementById("feedbackText").value = '';
+
+    document.getElementById("afterfeedback-stack").style.display = "flex";
+}
+
+document.getElementById("doneFeedback").onclick = function() {
+    document.getElementById("afterfeedback-stack").style.display = "none";
+}
+
+document.getElementById("closeBtn2").onclick = function() {
+    document.getElementById("afterfeedback-stack").style.display = "none";
 }
 
 //-----------------------------------------------------
 // Option li
 
 const links = document.querySelectorAll('.nav-link');
+let secu=document.getElementById('secu');
+let pref=document.getElementById('pref');
+
+secu.style.display="flex";
+pref.style.display="none";
 
 links.forEach(link => {
     link.addEventListener('click', function(event) {
         event.preventDefault(); // Prevent default behavior of anchor links
 
         // Remove 'active' class from all links
-        
+    
 
         if(this.id === "security"){
             links.forEach(l => l.classList.remove('active'));
             this.classList.add('active');
             document.querySelector(".security").style.display = "flex";
             document.querySelector(".preferences").style.display = "none";
+
+            secu.style.display="flex";
+            pref.style.display="none";
         }
         else if(this.id === "preferences"){
             links.forEach(l => l.classList.remove('active'));
             this.classList.add('active');
             document.querySelector(".security").style.display = "none";
             document.querySelector(".preferences").style.display = "flex";
+
+            secu.style.display="none";
+            pref.style.display="grid";
         }
         else if(this.id === "delete") {
             document.getElementById("alert-stack").style.display = "flex";
@@ -774,3 +796,57 @@ function updatePasswordStrength() {
     }
 }
 });
+
+//---------------------------------------
+// preferences:
+let selectedCategories = new Set(); 
+
+document.addEventListener('DOMContentLoaded', () => {
+
+fetch(`/user_preferences/${userId}/`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.preferences) {
+            data.preferences.forEach(pref => {
+                selectedCategories.add(pref.category_id);
+            });
+
+            // Mark the corresponding cards as selected
+            document.querySelectorAll('.card').forEach(card => {
+                let categoryId = card.getAttribute('preference');
+                if (selectedCategories.has(parseInt(categoryId))) {
+                    card.classList.add('selected');
+                }
+            });
+        }
+
+    })
+    .catch(error => console.error('Error fetching preferences:', error));
+});
+
+function toggleCard(card) {
+    const preferenceId = card.getAttribute('preference');
+    
+    // Always allow adding categories
+    if (!card.classList.contains('selected')) {
+        card.classList.add('selected');
+        selectedCategories.add(parseInt(preferenceId));  // Add to set
+    } else {
+        // Only allow deleting if size is >= 4
+        if (selectedCategories.size >= 4) {
+            card.classList.remove('selected');
+            selectedCategories.delete(parseInt(preferenceId));  // Remove from set
+        }
+    }
+
+    // Update the preferences dynamically
+    fetch("/save_preferences/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: `preferences=${Array.from(selectedCategories).join(',')}&user_id=${userId}`
+    })
+    .then(response => response.json())
+    .catch(error => console.error("Error:", error));
+}

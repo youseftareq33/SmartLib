@@ -132,6 +132,17 @@
                     </div>
                 </div>
 
+                <div class="feedback-stack" id="afterfeedback-stack">
+                    <div class="feedback-content">
+                        <span class="close-btn" id="closeBtn2">&times;</span>
+                        <h2>Feedback Sends Successfully</h2>
+                        <p>Thank you for your feedback! We appreciate it and will work on improving. 😊</p>
+                        <br>
+                        <br>
+                        <button id="doneFeedback">Done</button>
+                    </div>
+                </div>
+
             </div>
 
         </header>
@@ -173,7 +184,7 @@
     
                 <hr class="vertical-line">
     
-                <div class="security">
+                <div class="security" id="secu">
                     <div class="account-settings">
                         <h1>Account</h1>
                         <p>Edit your account settings and change your password here.</p>
@@ -196,6 +207,25 @@
                         <button id="btn_change_pass" class="change-password">Change Password</button>
                     </form>
                 </div>
+
+                <div class="preferences" id="pref">
+                    <div class="prefrences-settings">
+                        <h1>Edit Preferences</h1>
+                        <p>Edit your preferences to customize your experience.</p>
+                    </div>
+                    <hr>
+    
+                    <div class="preferences-box">
+                        {% for category in Category %}
+                            <div class="card" onclick="toggleCard(this)" preference="{{category.category_id}}">
+                                <h3>{{category.category_name}}</h3>
+                                <input type="radio" name="preference" value="{{category.category_id}}" style="display: none;">
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+
             </div>
 
          </main>

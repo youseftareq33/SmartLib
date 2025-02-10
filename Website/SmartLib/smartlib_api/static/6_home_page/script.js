@@ -565,8 +565,11 @@ document.getElementById("sendFeedback").onclick = function() {
 
     // Ensure feedback text is not empty
     if (feedbackText.trim() === '') {
-        alert("Please write some feedback before sending.");
+        document.getElementById("feedbackText").style.borderColor = "red";
         return;
+    }
+    else{
+        document.getElementById("feedbackText").style.borderColor = "";
     }
 
     // Log the data to verify it's being sent correctly
@@ -591,11 +594,18 @@ document.getElementById("sendFeedback").onclick = function() {
 
     // Close the feedback stack after sending feedback
     document.getElementById("feedback-stack").style.display = "none";
-
-    // Clear the feedback textarea
     document.getElementById("feedbackText").value = '';
+
+    document.getElementById("afterfeedback-stack").style.display = "flex";
 }
 
+document.getElementById("doneFeedback").onclick = function() {
+    document.getElementById("afterfeedback-stack").style.display = "none";
+}
+
+document.getElementById("closeBtn2").onclick = function() {
+    document.getElementById("afterfeedback-stack").style.display = "none";
+}
 
 //---------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------
@@ -707,7 +717,7 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(data => {
             if(data.count>0){
-                document.getElementById('continue-reading-book-container').style.display="flex";
+                document.getElementById('continue-reading-book-container').style.display="block";
 
                 currentData = data; // Store the fetched data
                 updateBookDetails(data); // Update the book details initially
