@@ -6,6 +6,8 @@ let user_name="";
 let user_rank="";
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('jwt_token');
+    const isDailyLogin = localStorage.getItem('isDailyLogin');
+
 
     if (!token) {
         window.location.href = '/login'; // Redirect to login if token is missing
@@ -74,6 +76,23 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(error => {
                 console.error("Error fetching Reader:", error);
             });
+
+            if (isDailyLogin=="true") {
+                document.querySelector('header').style.marginBottom="1%";
+                let alertBox = document.getElementById("gamefication_alert");
+                alertBox.style.display = "flex";
+            
+                setTimeout(() => {
+                    alertBox.style.display = "none";
+                    document.querySelector('header').style.marginBottom="5.2%";
+                    localStorage.removeItem('isDailyLogin');
+                }, 5000); // Hide after 5 seconds
+            }
+            else{
+                document.querySelector('header').style.marginBottom="5.2%";
+                localStorage.removeItem('isDailyLogin');
+            }
+            
         } 
         else {
             console.log("No user_id found.");

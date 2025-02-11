@@ -111,7 +111,6 @@ def ReaderSearchPage(request):
 
 #-- login --
 
-
 class UserLoginView(APIView):
     def post(self, request):
         email = request.data.get('email')
@@ -135,12 +134,49 @@ class UserLoginView(APIView):
 
                     token = jwt.encode(payload, 'secret', algorithm='HS256')
 
-                    return Response({'jwt': token}, status=status.HTTP_200_OK)
+                    # Get current date without time
+                    current_date = now().date()
+                    last_login_date = user.last_login if user.last_login else None
+
+                    isDailyLogin = False
+
+                    # Find the Reader entry for this user
+                    reader = Reader.objects.get(user_id=user.user_id)
+
+                    if (current_date != last_login_date) or (reader.is_first_time==True):
+                        isDailyLogin = True
+
+                        # Update reader points
+                        reader.reader_point += 10
+                        reader.save(update_fields=['reader_point'])
+
+                        # Insert new gamification record
+                        Gamification_Record.objects.create(
+                            reader_id=reader.reader_id,
+                            gamification_description="Daily login",
+                            achieved_point=10
+                        )
+
+                        Notification.objects.create(
+                            reader_id=reader.reader_id,
+                            manager_id=2,
+                            notification_record="+10 Point for Daily login",
+                            notification_title="New Point Achievement"
+                        )
+            
+
+                    # Update last_login timestamp
+                    user.last_login = now().date()
+                    user.save(update_fields=['last_login'])  # Ensure last_login is updated
+                    user.refresh_from_db()
+
+                    return Response({'jwt': token, 'isDailyLogin': isDailyLogin}, status=status.HTTP_200_OK)
                 else:
                     raise AuthenticationFailed("Your account has not activated yet.", status=status.HTTP_401_UNAUTHORIZED)
                     
         except User.DoesNotExist:
             raise AuthenticationFailed("User not found or incorrect password!", status=status.HTTP_401_UNAUTHORIZED)
+        
 #--------------------------------------------------------------------------------------------
 
 
@@ -703,6 +739,71 @@ class BookSearchView(APIView):
 
     
 
+def add_book(request):
+    if request.method == 'POST':
+        try:
+            # Retrieve POST data
+            book_name = request.POST.get('title')
+            book_author = request.POST.get('author')
+            book_barcode = request.POST.get('barcode')
+            book_description = request.POST.get('description')
+            category_id = request.POST.get('category')
+            book_file = request.FILES.get('bookfile')
+            book_image = request.FILES.get('bookImage')
+            reader_id=request.POST.get('reader_id')
+
+            # Log the data for debugging
+            print("POST data:", request.POST)
+            print("FILES data:", request.FILES)
+
+            # Validate category
+            category = Category.objects.filter(category_id=category_id).first()
+            if not category:
+                return JsonResponse({'status': 'error', 'message': 'Invalid category.'}, status=400)
+
+            # Save the book without file and image to get the book ID
+            book = Book.objects.create(
+                book_name=book_name,
+                book_author=book_author,
+                book_type=category.category_name,
+                book_barcode=book_barcode,
+                book_description=book_description,
+                category_id=category_id,
+                book_reading_counter=0,
+                book_rating_avg=0,
+                book_favourite_counter=0,
+                status=Book.Status.PENDING,
+                book_uploaded_date=now()
+            )
+
+            # Rename and save the book file
+            book_file_extension = book_file.name.split('.')[-1]
+            book_file_name = f"{book.book_id}_file.{book_file_extension}"
+            book.book_file.save(book_file_name, book_file)
+
+            if book_image is not None:
+                book_image_extension = book_image.name.split('.')[-1]
+                book_image_name = f"{book.book_id}_image.{book_image_extension}"
+                book.book_image.save(book_image_name, book_image)
+
+
+            # Save the book instance with updated file paths
+            book.save()
+
+            UploadedBook.objects.create(
+                reader_id=reader_id,
+                book_id=book.book_id
+            )
+
+
+            return JsonResponse({'status': 'success', 'message': 'Book added successfully!', 'book_id': book.book_id})
+
+        except Exception as e:
+            # Log the exception
+            print("Error occurred:", e)
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 #-----------------------------------Reader
 
 class MostReadedPreferences_BookListView(APIView):

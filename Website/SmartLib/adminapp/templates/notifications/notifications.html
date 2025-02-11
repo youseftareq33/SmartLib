@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notifications</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/notifications.css' %}">
-    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+    <title>Notifications Page-SmartLib</title>
+    <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
 </head>
 <body>
     <header>
@@ -85,6 +85,7 @@
                         <th>Book Name</th>
                         <th>Author</th>
                         <th>Category</th>
+                        <th>Preview Book</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -94,6 +95,9 @@
                         <td>{{ Book.book_name }}</td>
                         <td>{{ Book.book_author }}</td>
                         <td>{{ Book.category.category_name }}</td>
+                        <td>
+                            <button class="open-btn" onclick="openBook({{Book.book_id}})">Open Book</button>
+                        </td>
                         <td>
                             <button class="accept-btn" onclick="updateBookStatus({{ Book.book_id }}, 'Accepted')">Accept</button>
                             <button class="reject-btn" onclick="updateBookStatus({{ Book.book_id }}, 'Rejected')">Reject</button>

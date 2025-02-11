@@ -152,9 +152,9 @@
             <!-- Top -->
             <div class="top_main_container" id="top_main_container">
                 <h1>My Uploaded Book</h1>
-                <div class="search-container">
-                    <button>Upload Book</button>
-                    
+                <div class="search-container" id="upload_book">
+                    <img id="upload_book_img" src='{% static "images/add_book.png" %}' width="30" height="30">
+                    <p id="upload_book_text">Upload Book</p>
                 </div>
             </div>
 
@@ -308,6 +308,50 @@
             </div>
 
          </main>
+
+         <!-- Upload Book Modal -->
+        <div id="upload-book-container" style="display: none;">
+            <form id="uploadForm" class="upload-form" method="POST" enctype="multipart/form-data" onsubmit="submitForm(event)">
+                <div class="file-upload" id="fileUpload" onclick="triggerFileInput()">
+                    <p>Click to upload your book file</p>
+                    <input type="file" id="fileInput" name="bookfile" accept=".pdf" onchange="fileSelected(event)" style="display: none;">
+                </div>
+                <p id="fileNameDisplay"></p>
+                <label id="fileSizeLabel" class="max-size">No file selected</label>
+
+                <div class="form-content">
+                    <div class="form-left">
+                        <label for="title">Book Title:</label>
+                        <input type="text" id="title" name="title" placeholder="Book Title" required>
+
+                        <label for="author">Author:</label>
+                        <input type="text" id="author" name="author" placeholder="Author Name" required>
+
+                        <label for="category">Category:</label>
+                        <select id="category" name="category" required>
+                            <option value="" disabled selected>Select Category</option>
+                        </select>
+
+                        <label for="barcode">Barcode:</label>
+                        <input type="text" id="barcode" name="barcode" placeholder="Barcode" required>
+                    </div>
+
+                    <div class="form-right">
+                        <label for="description">Description:</label>
+                        <textarea id="description" name="description" rows="4" placeholder="Add a brief description..." required></textarea>
+                        <div class="input_container">
+                            <label for="imageUpload1">Upload Book Cover:</label>
+                            <div class="image-box" onclick="triggerImageInput('imageUpload1')">
+                                <img id="imagePreview1" style="display: none;" alt="Image Preview">
+                            </div>
+                            <input type="file" id="imageUpload1" name="bookImage" accept=".jpg,.jpeg,.png,.gif" onchange="previewImage(event, 'imagePreview1')" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+                <button id="submitBtn" type="submit">Submit</button>
+                <button type="button" class="cancel-btn" onclick="closeUploadForm()">Cancel</button>
+            </form>
+        </div>
 
         <!-- Script -->
         <script src="{% static '10_myUploadedBook_page/script.js' %}"></script>

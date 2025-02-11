@@ -190,6 +190,9 @@ function populateNotificationsTable(books) {
             <td>${book.book_author}</td>
             <td>${book.category__category_name}</td>
             <td>
+                <button class="open-btn" onclick="openBook(${book.book_id})">Open Book</button>
+            </td>
+            <td>
                 <button class="accept-btn" onclick="updateBookStatus(${book.book_id}, 'Accepted')">Accept</button>
                 <button class="reject-btn" onclick="updateBookStatus(${book.book_id}, 'Rejected')">Reject</button>
             </td>
@@ -211,14 +214,22 @@ function updateBookStatus(bookId, status) {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
+        
             return response.json();
         })
         .then(data => {
-            alert(`Book status updated to ${status}!`);
+            location.reload();
         })
         .catch(error => {
             console.error('Error updating book status:', error);
         });
+}
+
+function openBook(bookId){
+    // Construct the PDF file URL
+    let pdfUrl = `/books/files/${bookId}_file.pdf`;
+    // Open the PDF in a new tab
+    window.open(pdfUrl, '_blank');
 }
 
 

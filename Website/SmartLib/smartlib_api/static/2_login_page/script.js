@@ -35,7 +35,8 @@ login_btn.addEventListener('click', async (event) => {
         else{
             const data = await response.json();
             localStorage.setItem('jwt_token', data.jwt); // Store the token in local storage
-
+            localStorage.setItem('isDailyLogin', data.isDailyLogin);
+            
             // Decode the JWT token to get the user data
             const decodedToken = jwt_decode(data.jwt);
             userId = decodedToken.id; // Extract the user ID

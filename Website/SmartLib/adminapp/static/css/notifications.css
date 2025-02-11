@@ -480,6 +480,15 @@ button {
     transition: all 0.3s ease;
 }
 
+.open-btn {
+    background-color: #4d626c; 
+    color: white;
+}
+
+.open-btn:hover {
+    background-color: #617179; 
+}
+
 .accept-btn {
     background-color: #4CAF50; 
     color: white;

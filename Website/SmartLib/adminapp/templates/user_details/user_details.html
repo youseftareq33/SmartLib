@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Details</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/user_details.css' %}">
-    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+    <title>User_Details Page-SmartLib</title>
+    <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
 
 </head>
 <body>
@@ -136,7 +136,7 @@
                                 {{ reader.user.email }}
                             </td>
                             <td style="max-width: 150px; overflow-x: auto; white-space: nowrap;">
-                                {{ reader.user.last_login|date:"Y-m-d H:i:s" }}
+                                {{ reader.user.last_login|date:"Y-m-d" }}
                             </td>
                             <td contenteditable="true" class="editable" data-field="is_active" 
                                 style="max-width: 100px; overflow-x: auto; white-space: nowrap;">

@@ -11,7 +11,7 @@ class User(models.Model):
     user_password=models.CharField(max_length=255)
     is_active = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
-    last_login = models.DateTimeField(null=True, default=now)
+    last_login = models.DateField(null=True, default=now)
     @property
     def password(self):
         return self.user_password

@@ -5,7 +5,7 @@ import datetime
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from sympy import Q
-from smartlib_api.models import  Book, Category, FeedBack, Reader, User
+from smartlib_api.models import  Book, Category, FeedBack, Reader, User, Notification, UploadedBook
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.contrib.auth.hashers import make_password
@@ -315,6 +315,23 @@ class UpdateBookStatus(View):
 
             book.status = status
             book.save()
+
+            uploadedBook = UploadedBook.objects.filter(book_id=book_id).first()
+
+            if book.status == 'Accepted':
+                Notification.objects.create(
+                    reader_id=uploadedBook.reader_id,
+                    manager_id=2,
+                    notification_record="your book now is uploaded in SmartLib library.",
+                    notification_title="Accept Uploaded Book",
+                )
+            elif book.status == 'Rejected':
+                Notification.objects.create(
+                    reader_id=uploadedBook.reader_id,
+                    manager_id=2,
+                    notification_record="your book dosn't meet SmartLib standards and conditions.",
+                    notification_title="Rejected Uploaded Book",
+                )
 
             return JsonResponse({'message': 'Book status updated successfully.'})
         except Book.DoesNotExist:

@@ -65,6 +65,7 @@ urlpatterns = [
     path('InsertFeedbackView/', InsertFeedbackView.as_view()),
     path('getUploadedBookListView/', UploadedBookListView.as_view()),
     path('insertBook/', CreateBookView.as_view()),
+    path('insertNewBook/', add_book, name='add_book'),
     path('summarize/', summarize_text, name='summarize_text'),
     path('translate/', translate_text, name='translate_text'),
     path('text_to_speech/', text_to_speech, name='text_to_speech'),

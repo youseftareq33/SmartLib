@@ -2,6 +2,7 @@
 //-- Auth Access --
 
 let userId = -1;  
+let reader_id=-1;
 let user_name="";
 let user_rank="";
 document.addEventListener('DOMContentLoaded', () => {
@@ -36,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(data => {
                 if (data) {
                     const reader_rank = data.reader_rank;  // Assign the fetched reader_rank
+                    reader_id=data.reader_id;
                     document.getElementById('user_rank').textContent = "Rank: " + reader_rank;
 
                     if(reader_rank=="Rookie"){
@@ -604,6 +606,146 @@ document.getElementById("doneFeedback").onclick = function() {
 document.getElementById("closeBtn2").onclick = function() {
     document.getElementById("afterfeedback-stack").style.display = "none";
 }
+
+//---------------------------------------------------------------------------------------
+// upload book
+
+upload_book_button=document.getElementById("upload_book");
+
+upload_book_button.addEventListener('mouseenter', () => {
+    document.getElementById("upload_book_img").src= '/static/images/after_add_book.png';
+    document.getElementById("upload_book_text").style.color="#3f48cc";
+});
+
+// Event listener for when mouse leaves the categories button
+upload_book_button.addEventListener('mouseleave', (event) => {
+    document.getElementById("upload_book_img").src= '/static/images/add_book.png';
+    document.getElementById("upload_book_text").style.color="black";
+});
+
+
+upload_book_button.onclick = function() {
+    document.getElementById("upload-book-container").style.display = "flex";
+}
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    fetchCategories();
+});
+
+function fetchCategories() {
+    console.log("Fetching categories..."); // Debugging
+    fetch("/adminpanel/api/categories/")
+        .then(response => {
+            console.log("Fetch response status:", response.status); // Debugging
+            return response.json();
+        })
+        .then(data => {
+            console.log("Categories data:", data); // Debugging
+            const categorySelect = document.getElementById("category");
+            categorySelect.innerHTML = '<option value="" disabled selected>Select Category</option>';
+            data.categories.forEach(category => {
+                const option = document.createElement("option");
+                option.value = category.category_id;
+                option.textContent = category.category_name;
+                categorySelect.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error("Error fetching categories:", error);
+        });
+}
+
+document.addEventListener("DOMContentLoaded", fetchCategories);
+
+
+//-------------------
+// Function to open the file input when the drag-and-drop area is clicked
+function triggerFileInput() {
+    document.getElementById('fileInput').click();
+}
+
+// Function to handle file selection
+function fileSelected(event) {
+    const file = event.target.files[0];
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+    const fileSizeLabel = document.getElementById('fileSizeLabel');
+
+    if (file) {
+        fileNameDisplay.textContent = file.name;
+        fileSizeLabel.textContent = `Size: ${(file.size / 1024 / 1024).toFixed(2)} MB`;
+    } else {
+        fileNameDisplay.textContent = '';
+        fileSizeLabel.textContent = 'No file selected';
+    }
+}
+
+// Function to trigger image input for book cover
+function triggerImageInput(imageInputId) {
+    document.getElementById(imageInputId).click();
+}
+
+// Function to preview the selected image
+function previewImage(event, imagePreviewId) {
+    const file = event.target.files[0];
+    const imagePreview = document.getElementById(imagePreviewId);
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            imagePreview.src = e.target.result;
+            imagePreview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// Function to handle form submission
+async function submitForm(event) {
+    event.preventDefault();
+
+    const form = document.getElementById('uploadForm');
+    const formData = new FormData(form);
+    formData.append("reader_id",reader_id);
+    try {
+        const response = await fetch('insertNewBook/', {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error response:', errorText);
+            alert(`Error: ${errorText}`);
+            return;
+        }
+
+        const result = await response.json();
+        if (result.status === 'success') {
+            closeUploadForm();
+            location.reload();
+        }
+        else{
+            alert(`Error: Fill all Feild`);
+        }
+    } catch (error) {
+        console.error('Error occurred:', error);
+        alert('An unexpected error occurred. Please try again later.');
+    }
+}
+
+// Function to close the upload modal
+function closeUploadForm() {
+    const uploadContainer = document.getElementById('upload-book-container');
+    uploadContainer.style.display = 'none';
+
+    // Reset the form
+    document.getElementById('uploadForm').reset();
+    document.getElementById('fileNameDisplay').textContent = '';
+    document.getElementById('fileSizeLabel').textContent = 'No file selected';
+    document.getElementById('imagePreview1').style.display = 'none';
+}
+
 
 //---------------------------------------------------------------------------------------
 
