@@ -62,6 +62,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.error("Error fetching user name:", error);
                 });
 
+
+            fetch(`/get_uploadedby/?book_id=${book_id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data) {
+                        document.getElementById('uploaded_by').textContent = `Uploaded by: ${data || 'Manager'}`;
+                    } else {
+                        console.error("Book not found");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching user name:", error);
+                });
+
             fetch(`/get_reader_info?user_id=${userId}`)
             .then(response => response.json())
             .then(data => {
@@ -734,7 +748,50 @@ submit_review_btn.addEventListener('click', async (event) => {
             star_num.textContent = ""; // Reset star_num text
             resetStars(); // Reset star styles to default
             stars.forEach(star => star.classList.remove('active')); // Remove active class from all stars
-            location.reload();
+
+            fetch(`/list_Three-rating_and_review?book_id=${book_id}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch Comment');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if(data.count === 0){
+                    mission_prev.style.display = 'none';
+                    mission_next.style.display = 'none';
+                }
+                else{
+                currentData = data; // Store the fetched data
+                updateCommentDetails(data); // Update the Comment details initially
+
+                // Event listener for "Previous" button
+                mission_prev.addEventListener('click', (event) => {
+                    event.preventDefault(); 
+                    if (currentData.previous) {
+                        loadComment(currentData.previous); 
+                    }
+                });
+
+                // Event listener for "Next" button
+                mission_next.addEventListener('click', (event) => {
+                    event.preventDefault(); 
+                    if (currentData.next) {
+                        loadComment(currentData.next); 
+                    }
+                });
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching Comment', error);
+            });
+
+            let alertBox = document.getElementById("gamefication_alert");
+            alertBox.style.display = "flex";
+        
+            setTimeout(() => {
+                alertBox.style.display = "none";
+            }, 5000); // Hide after 5 seconds
         }
     }
 });

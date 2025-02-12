@@ -37,6 +37,7 @@ urlpatterns = [
     path('get_username/<int:user_id>/', UserNameListView.as_view(), name='get_username'),
     path('get_reader_info/', ReaderInfoListView.as_view(), name='get_reader_info'),
     path('get_book_info/', BookInfoListView.as_view(), name='get_book_info'),
+    path('get_uploadedby/', UploadedByView.as_view(), name='get_uploadedby'),
     path('register-api',RegisterAPIView.as_view()),
     path('check-email-api',EmailExistView.as_view()),
     path('reset-password-api', reset_password.as_view()), 

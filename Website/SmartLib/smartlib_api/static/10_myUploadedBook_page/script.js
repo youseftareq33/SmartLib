@@ -723,11 +723,18 @@ async function submitForm(event) {
         const result = await response.json();
         if (result.status === 'success') {
             closeUploadForm();
-            location.reload();
         }
         else{
             alert(`Error: Fill all Feild`);
         }
+        document.querySelector('main').style.marginTop="0px";
+        let alertBox = document.getElementById("gamefication_alert");
+            alertBox.style.display = "flex";
+        
+            setTimeout(() => {
+                alertBox.style.display = "none";
+                document.querySelector('main').style.marginTop="71px";
+            }, 5000); // Hide after 5 seconds
     } catch (error) {
         console.error('Error occurred:', error);
         alert('An unexpected error occurred. Please try again later.');
@@ -744,6 +751,40 @@ function closeUploadForm() {
     document.getElementById('fileNameDisplay').textContent = '';
     document.getElementById('fileSizeLabel').textContent = 'No file selected';
     document.getElementById('imagePreview1').style.display = 'none';
+
+    // Fetch initial data when page loads
+    fetch(`/getUploadedBookListView?user_id=${userId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch books');
+            }
+            return response.json();
+        })
+        .then(data => {
+            currentData = data; // Store the fetched data
+            updateBookDetails(data); // Update the book details initially
+
+            // Event listener for "Previous" button
+            book_prev.addEventListener('click', (event) => {
+                event.preventDefault(); // Prevent the default anchor behavior
+                if (currentData.previous) {
+                    curr_url_continue=currentData.previous;
+                    loadBooks(curr_url_continue); 
+                }
+            });
+
+            // Event listener for "Next" button
+            book_next.addEventListener('click', (event) => {
+                event.preventDefault(); 
+                if (currentData.next) {
+                    curr_url_continue=currentData.next;
+                    loadBooks(curr_url_continue); 
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching books:', error);
+        });
 }
 
 

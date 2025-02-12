@@ -138,6 +138,8 @@
                     <h2>Feedback Sends Successfully</h2>
                     <p>Thank you for your feedback! We appreciate it and will work on improving. 😊</p>
                     <br>
+                    <p>note that: you achieved +30 point for added feedback <img src='{% static "images/80z.gif" %}' width="20" height="20"></p>
+                    <br>
                     <br>
                     <button id="doneFeedback">Done</button>
                 </div>
@@ -155,6 +157,7 @@
 
                 <img id="book_img" src="{% static 'images/book.png' %}" alt="Book Cover" class="book-cover">
                 <h3 id="title">BZU Story</h3>
+                <p id="uploaded_by">Uploaded by: no user</p>
                 <p id="author">Author: no Author</p>
                 <p id="category">Category: no category</p>
                 <p id="rating">Rating: ⭐⭐⭐⭐</p>
@@ -191,6 +194,12 @@
                 <hr id="divider_top" class="divider_top">
 
                 <div class="book_ratingAndReview_container" id="book_ratingAndReview_container">
+                    <div class="gamefication_alert" id="gamefication_alert">
+                        <img src="{% static 'images/point.png' %}" width='40' height='40'>
+                        <p class="game_num">+20</p>
+                        <p class="game_des">Rating And Review Book Achievement</p>
+                    </div>
+
                     <h2>Rating and Review</h2>
 
                     <div class="new_user_rate_container" id="new_user_rate_container">

@@ -546,6 +546,20 @@ class BookInfoListView(APIView):
         except Reader.DoesNotExist:
             return Response({"error": "Book not found"}, status=status.HTTP_400_BAD_REQUEST)
 
+class UploadedByView(APIView):
+    def get(self, request):
+
+        book_id = request.query_params.get('book_id')
+
+        uploadedBook=UploadedBook.objects.filter(book_id=book_id).first()
+
+        if uploadedBook == None:
+            return Response("Manager", status=status.HTTP_200_OK)
+        else:
+            reader = Reader.objects.get(reader_id=uploadedBook.reader_id)
+            user = User.objects.get(user_id=reader.user_id)
+            return Response(user.user_name, status=status.HTTP_200_OK)
+        
 #--------------------------------------------------------------------------------------------
 
 #-- list book (pagination achived)
@@ -621,6 +635,24 @@ class AddRatingAndReviewView(APIView):
         # Update the book's average rating
         book.book_rating_avg = average_rating
         book.save()
+
+        # Update reader points
+        reader.reader_point += 20
+        reader.save(update_fields=['reader_point'])
+
+        # Insert new gamification record
+        Gamification_Record.objects.create(
+            reader_id=reader.reader_id,
+            gamification_description="Rating And Review Book Achievement",
+            achieved_point=20
+        )
+
+        Notification.objects.create(
+            reader_id=reader.reader_id,
+            manager_id=2,
+            notification_record="+20 Point for Rating And Review Book",
+            notification_title="New Point Achievement"
+        )
 
         return Response({"message": "Rating and review added successfully."}, status=status.HTTP_201_CREATED)
     
@@ -790,9 +822,28 @@ def add_book(request):
             # Save the book instance with updated file paths
             book.save()
 
+            reader = Reader.objects.filter(reader_id=reader_id).first()
+            # Update reader points
+            reader.reader_point += 50
+            reader.save(update_fields=['reader_point'])
+
             UploadedBook.objects.create(
                 reader_id=reader_id,
                 book_id=book.book_id
+            )
+
+            # Insert new gamification record
+            Gamification_Record.objects.create(
+                reader_id=reader_id,
+                gamification_description="Upload Books Achievement",
+                achieved_point=50
+            )
+
+            Notification.objects.create(
+                reader_id=reader_id,
+                manager_id=2,
+                notification_record="+50 Point for Uploaded Books Achievement",
+                notification_title="New Point Achievement"
             )
 
 
@@ -1119,6 +1170,26 @@ class InsertFeedbackView(APIView):
             return Response({"error": "Reader not found"}, status=status.HTTP_404_NOT_FOUND)
         
         feedback = FeedBack.objects.create(reader_id=reader.reader_id, feedback_description=feedback_description)
+
+        # Update reader points
+        reader.reader_point += 30
+        reader.save(update_fields=['reader_point'])
+
+        
+
+        # Insert new gamification record
+        Gamification_Record.objects.create(
+            reader_id=reader.reader_id,
+            gamification_description="Add Feedback for System Achievement",
+            achieved_point=30
+        )
+
+        Notification.objects.create(
+            reader_id=reader.reader_id,
+            manager_id=2,
+            notification_record="+30 Point for Feedback for System Achievement",
+            notification_title="New Point Achievement"
+        )
 
         # Serialize the feedback object
         serializer = FeedBackSerializer(feedback)
