@@ -4,7 +4,7 @@
 let userId = -1;  
 let user_name="";
 let user_rank="";
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('jwt_token');
 
     if (!token) {
@@ -25,6 +25,23 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.removeItem('jwt_token'); // Remove expired token
             window.location.href = '/login'; // Redirect to login page
             return;
+        }
+        else {
+            // Refresh token before expiration
+            const response = await fetch('/refresh-token-api', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ token: token })
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to refresh token');
+            }
+    
+            const data = await response.json();
+            localStorage.setItem('jwt_token', data.jwt);
         }
 
         console.log('User ID:', userId);

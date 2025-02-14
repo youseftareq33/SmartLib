@@ -10,7 +10,7 @@ const url = window.location.href;
 const urlParts = url.split('/');
 const book_id = urlParts[urlParts.length - 2];
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('jwt_token');
 
     if (!token) {
@@ -32,8 +32,29 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = '/login'; // Redirect to login page
             return;
         }
+        else {
+            // Refresh token before expiration
+            const response = await fetch('/refresh-token-api', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ token: token })
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to refresh token');
+            }
+    
+            const data = await response.json();
+            localStorage.setItem('jwt_token', data.jwt);
+        }
 
         console.log('User ID:', userId);
+
+        document.getElementById("un_tts").style.display="none";
+        document.getElementById("un_t").style.display="none";
+        document.getElementById("un_s").style.display="none";
 
         // Check if user_id is available
         if (userId !== -1) {
@@ -63,13 +84,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     else if(reader_rank=="Bronze"){
                         document.getElementById('img_rank').src = '/static/images/bronze_rank.png'; 
+                        document.getElementById("l_t").style.display="none";
+                        document.getElementById("un_t").style.display="initial";
                     }
                     else if(reader_rank=="Silver"){
                         document.getElementById('img_rank').src = '/static/images/silver_rank.png'; 
+                        document.getElementById("l_tts").style.display="none";
+                        document.getElementById("l_t").style.display="none";
+                        document.getElementById("un_tts").style.display="initial";
+                        document.getElementById("un_t").style.display="initial";
                     }
                     else if(reader_rank=="Gold"){
-                        document.getElementById('img_rank').src = '/static/images/gold_rank.png'; 
+                        document.getElementById('img_rank').src = '/static/images/gold_rank.png';  
+                        document.getElementById("l_tts").style.display="none";
+                        document.getElementById("l_t").style.display="none";
+                        document.getElementById("l_s").style.display="none";
+                        document.getElementById("un_tts").style.display="initial";
+                        document.getElementById("un_t").style.display="initial";
+                        document.getElementById("un_s").style.display="initial";
                     }
+
+                    
+                    
 
                 } else {
                     console.error("Reader not found");
@@ -661,6 +697,8 @@ sider_Button.onclick = function() {
 
 
 // book feature
+let audio = null;
+
 function performFeature(feature) {
     let text = '';
     let textareaId = '';
@@ -676,6 +714,8 @@ function performFeature(feature) {
         text = document.getElementById(textareaId).value;
     }
 
+    text = text.replace(/\s+/g, ' ').trim();
+    document.getElementById(textareaId).value=text;
     if (!text) {
         alert("Please paste text into the box to use this feature.");
         return;
@@ -691,8 +731,22 @@ function performFeature(feature) {
     .then(response => response.json())
     .then(data => {
         if (feature === 'text_to_speech') {
-            const audio = new Audio(data.audio_url);
-            audio.play();
+            if (audio) {
+                audio.pause();  // Stop any ongoing audio before playing new one
+                audio.currentTime = 0; // Reset audio position
+            }
+
+            audio = new Audio(data.audio_url);
+
+            window.addEventListener("beforeunload", function () {
+                if (audio) {
+                    audio.pause();  
+                    audio.currentTime = 0;  
+                }
+            });
+            
+
+            audio.play().catch(error => console.error("Error playing audio:", error));
         } else {
             document.getElementById(textareaId).value = data.result;
         }
@@ -701,4 +755,19 @@ function performFeature(feature) {
         console.error("Error processing the text:", error);
         alert("There was an error processing the text.");
     });
+}
+
+
+// Stop text-to-speech playback
+function stopSpeech() {
+    if (audio) {
+        audio.pause();
+        audio.currentTime = 0;  // Reset audio playback
+    }
+
+    fetch('/stop_text_to_speech/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .catch(error => console.error("Error stopping speech:", error));
 }

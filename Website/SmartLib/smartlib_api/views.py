@@ -97,6 +97,10 @@ def ViewBookPage(request, book_id):
     return render(request, '12_viewBook_page.html', {'book_id': book_id})
 
 def OpenBookPage(request, book_id):
+    book=Book.objects.get(book_id=book_id)
+    book.book_reading_counter+=1
+    book.save(update_fields=['book_reading_counter'])
+
     return render(request, '14_openBook_page.html', {'book_id': book_id})
 
 def GuestSearchPage(request):
@@ -148,7 +152,15 @@ class UserLoginView(APIView):
 
                         # Update reader points
                         reader.reader_point += 10
-                        reader.save(update_fields=['reader_point'])
+                        if(reader.reader_point>=500 and reader.reader_point<1500):
+                            reader.reader_rank="Bronze"
+                        elif(reader.reader_point>=1500 and reader.reader_point<3000):
+                            reader.reader_rank="Silver"
+                        elif(reader.reader_point>=3000):
+                            reader.reader_rank="Gold"
+                        
+                        reader.save()
+
 
                         # Insert new gamification record
                         Gamification_Record.objects.create(
@@ -177,6 +189,39 @@ class UserLoginView(APIView):
         except User.DoesNotExist:
             raise AuthenticationFailed("User not found or incorrect password!", status=status.HTTP_401_UNAUTHORIZED)
         
+
+
+class RefreshTokenView(APIView):
+    def post(self, request):
+        token = request.data.get("token")
+
+        if not token:
+            raise AuthenticationFailed("Token is required!", status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'], options={"verify_exp": False})
+            user = User.objects.get(user_id=payload['id'])
+
+            if not user.is_active:
+                raise AuthenticationFailed("Your account is not active.", status=status.HTTP_401_UNAUTHORIZED)
+
+            # Generate new token
+            new_payload = {
+                'id': user.user_id,
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=180),  # 3 hours
+                'iat': datetime.datetime.utcnow()
+            }
+            new_token = jwt.encode(new_payload, 'secret', algorithm='HS256')
+
+            return Response({'jwt': new_token}, status=status.HTTP_200_OK)
+
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Token has expired!", status=status.HTTP_401_UNAUTHORIZED)
+        except jwt.InvalidTokenError:
+            raise AuthenticationFailed("Invalid token!", status=status.HTTP_401_UNAUTHORIZED)
+        except User.DoesNotExist:
+            raise AuthenticationFailed("User not found!", status=status.HTTP_401_UNAUTHORIZED)
+
 #--------------------------------------------------------------------------------------------
 
 
@@ -545,6 +590,22 @@ class BookInfoListView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Reader.DoesNotExist:
             return Response({"error": "Book not found"}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class ContinueReadingView(APIView):
+    def post(self, request):
+        book_id = request.data.get("book_id")
+        reader_id = request.data.get("reader_id")
+
+        bookContinueReading=BookContinueReading.objects.filter(book_id=book_id, reader_id=reader_id).first()
+
+        if bookContinueReading is None:
+            BookContinueReading.objects.create(
+                book_id=book_id,
+                reader_id=reader_id       
+            )
+
+        return JsonResponse({"message": "Continue reading created"})
 
 class UploadedByView(APIView):
     def get(self, request):
@@ -638,7 +699,14 @@ class AddRatingAndReviewView(APIView):
 
         # Update reader points
         reader.reader_point += 20
-        reader.save(update_fields=['reader_point'])
+        if(reader.reader_point>=500 and reader.reader_point<1500):
+            reader.reader_rank="Bronze"
+        elif(reader.reader_point>=1500 and reader.reader_point<3000):
+            reader.reader_rank="Silver"
+        elif(reader.reader_point>=3000):
+            reader.reader_rank="Gold"
+        
+        reader.save()
 
         # Insert new gamification record
         Gamification_Record.objects.create(
@@ -784,10 +852,6 @@ def add_book(request):
             book_image = request.FILES.get('bookImage')
             reader_id=request.POST.get('reader_id')
 
-            # Log the data for debugging
-            print("POST data:", request.POST)
-            print("FILES data:", request.FILES)
-
             # Validate category
             category = Category.objects.filter(category_id=category_id).first()
             if not category:
@@ -825,8 +889,14 @@ def add_book(request):
             reader = Reader.objects.filter(reader_id=reader_id).first()
             # Update reader points
             reader.reader_point += 50
-            reader.save(update_fields=['reader_point'])
-
+            if(reader.reader_point>=500 and reader.reader_point<1500):
+                reader.reader_rank="Bronze"
+            elif(reader.reader_point>=1500 and reader.reader_point<3000):
+                reader.reader_rank="Silver"
+            elif(reader.reader_point>=3000):
+                reader.reader_rank="Gold"
+            
+            reader.save()
             UploadedBook.objects.create(
                 reader_id=reader_id,
                 book_id=book.book_id
@@ -1173,9 +1243,14 @@ class InsertFeedbackView(APIView):
 
         # Update reader points
         reader.reader_point += 30
-        reader.save(update_fields=['reader_point'])
-
+        if(reader.reader_point>=500 and reader.reader_point<1500):
+            reader.reader_rank="Bronze"
+        elif(reader.reader_point>=1500 and reader.reader_point<3000):
+            reader.reader_rank="Silver"
+        elif(reader.reader_point>=3000):
+            reader.reader_rank="Gold"
         
+        reader.save()
 
         # Insert new gamification record
         Gamification_Record.objects.create(
@@ -1415,33 +1490,41 @@ from io import BytesIO
 import pygame # pip install pygame
 import tempfile
 
+pygame.mixer.init()
+
 def text_to_speech(request):
     if request.method == 'POST':
-        # Parse the request body to get the text
         data = json.loads(request.body)
         text = data.get('text', '')
 
         try:
-            # Convert text to speech
             tts = gTTS(text)
             audio_stream = BytesIO()
             tts.write_to_fp(audio_stream)
             audio_stream.seek(0)
 
-            # Save to a temporary file
             with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as temp_audio_file:
                 temp_audio_file.write(audio_stream.read())
                 temp_audio_path = temp_audio_file.name
 
-            # Initialize pygame and play the audio
-            pygame.mixer.init()
             pygame.mixer.music.load(temp_audio_path)
             pygame.mixer.music.play()
 
-            # Return a success response
-            return JsonResponse({'message': 'Audio is playing successfully.'})
+            return JsonResponse({'message': 'Audio is playing successfully.', 'audio_url': temp_audio_path})
         except Exception as e:
             print(f"Error: {e}")
             return JsonResponse({'error': 'Failed to convert text to speech.'}, status=500)
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
+def stop_text_to_speech(request):
+    if request.method == 'POST':
+        try:
+            pygame.mixer.music.stop()
+            return JsonResponse({'message': 'Audio playback stopped successfully.'})
+        except Exception as e:
+            print(f"Error stopping audio: {e}")
+            return JsonResponse({'error': 'Failed to stop audio.'}, status=500)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)

@@ -2,6 +2,7 @@
 //-- Auth Access --
 
 let userId = -1;  
+let reader_id=-1;
 let user_name="";
 let user_rank="";
 
@@ -10,7 +11,7 @@ const url = window.location.href;
 const urlParts = url.split('/');
 const book_id = urlParts[urlParts.length - 2];
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('jwt_token');
 
     if (!token) {
@@ -31,6 +32,23 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.removeItem('jwt_token'); // Remove expired token
             window.location.href = '/login'; // Redirect to login page
             return;
+        }
+        else {
+            // Refresh token before expiration
+            const response = await fetch('/refresh-token-api', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ token: token })
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to refresh token');
+            }
+    
+            const data = await response.json();
+            localStorage.setItem('jwt_token', data.jwt);
         }
 
         console.log('User ID:', userId);
@@ -81,6 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(data => {
                 if (data) {
                     const reader_rank = data.reader_rank;  // Assign the fetched reader_rank
+                    reader_id=data.reader_id;
                     document.getElementById('user_rank').textContent = "Rank: " + reader_rank;
 
                     if(reader_rank=="Rookie"){
@@ -639,6 +658,18 @@ document.getElementById("closeBtn2").onclick = function() {
 // Open Book
 
 document.getElementById('open_book').addEventListener('click', () => {
+
+    fetch('/creare-continue-reading/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            book_id: book_id,
+            reader_id: reader_id
+        })
+    });
+
     window.location.href = `/OpenBookPage/${book_id}`;
 });
 

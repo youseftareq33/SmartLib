@@ -4,7 +4,7 @@ let userId = -1;
 let user_name="";
 let user_rank="";
 let user_point=0;
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('jwt_token');
 
     if (!token) {
@@ -16,24 +16,41 @@ document.addEventListener('DOMContentLoaded', () => {
         // Decode the JWT token to get the user data
         const decodedToken = jwt_decode(token);
         userId = decodedToken.id; // Extract the user ID
-
+    
         // Check if the token has expired
         const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
         if (decodedToken.exp < currentTime) {
-            // If the token is expired, redirect to login page
             console.error('Token has expired.');
             localStorage.removeItem('jwt_token'); // Remove expired token
             window.location.href = '/login'; // Redirect to login page
             return;
+        } 
+        else {
+            // Refresh token before expiration
+            const response = await fetch('/refresh-token-api', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ token: token })
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to refresh token');
+            }
+    
+            const data = await response.json();
+            localStorage.setItem('jwt_token', data.jwt);
         }
-
+    
         console.log('User ID:', userId);
-
+    
     } catch (error) {
         console.error('Invalid token:', error);
         localStorage.removeItem('jwt_token'); // Remove invalid token
         window.location.href = '/login'; // Redirect to login
     }
+    
 });
 
 
@@ -593,6 +610,9 @@ document.addEventListener('DOMContentLoaded', () => {
             let numPoints = user_point;
             console.log(numPoints);
 
+            if(numPoints>3000){
+                numPoints=3000;
+            }
             function updateTriangle(){
                 let tri=-9; 
 

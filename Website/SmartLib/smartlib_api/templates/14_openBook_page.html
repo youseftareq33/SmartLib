@@ -170,25 +170,42 @@
         
                         <!-- Feature Boxes on the right -->
                         <div class="feature-container">
+
+                            <!-- Notes Box -->
+                            <div class="feature-box">
+                                <h3>Notes</h3>
+                                <textarea placeholder="Add your Text here..."></textarea>
+                            </div>
+
                             <!-- Text-to-Speech Box -->
                             <div class="feature-box">
                                 <h3>Text to Speech</h3>
-                                <textarea id="tts-text" placeholder="Paste text here for Text to Speech"></textarea>
-                                <button onclick="performFeature('text_to_speech')">Start Text to Speech</button>
+                                <p id="l_tts">to Unlock this feature, you should reach Silver level</p>
+                                <div id="un_tts">
+                                    <textarea id="tts-text" placeholder="Paste text here for Text to Speech"></textarea>
+                                    <button id="play" onclick="performFeature('text_to_speech')">Start Text to Speech</button>
+                                    <button id="stop" onclick="stopSpeech()">Stop</button>
+                                </div>
                             </div>
                 
                             <!-- Translation Box -->
                             <div class="feature-box">
                                 <h3>Translate</h3>
-                                <textarea id="translate-text" placeholder="Paste text here for Translation"></textarea>
-                                <button onclick="performFeature('translate')">Start Translation</button>
+                                <p id="l_t">to Unlock this feature, you should reach Bronze level</p>
+                                <div id="un_t">
+                                    <textarea id="translate-text" placeholder="Paste text here for Translation"></textarea>
+                                    <button onclick="performFeature('translate')">Start Translation</button>
+                                </div>
                             </div>
                 
                             <!-- Summarization Box -->
                             <div class="feature-box">
                                 <h3>Summarize</h3>
-                                <textarea id="summarize-text" placeholder="Paste text here for Summarization"></textarea>
-                                <button onclick="performFeature('summarize')">Start Summarization</button>
+                                <p id="l_s">to Unlock this feature, you should reach Gold level</p>
+                                <div id="un_s">
+                                    <textarea id="summarize-text" placeholder="Paste text here for Summarization"></textarea>
+                                    <button onclick="performFeature('summarize')">Start Summarization</button>
+                                </div>
                             </div>
                         </div>
                     </div>
