@@ -11,19 +11,27 @@ Key Features:
 - 🔊 Text-to-Speech – Listen to books.
 - 🌍 Translation-Text – Read books in arabic languages.
 - 🎁 Gamification system – Stay motivated with rewards and points.
-- JWT for authentication
-
+- 🔑 JWT for authentication.
 
 ## Tools and Technology:
 
-- 🔹 For Frontend :
- •   HTML,CSS and JS.
-- 🔹 For Backend:
- •   Python (Django Framework).
- •   Restful API.
-- 🔹 For Database and Storage:
- •    postgresSQL and ORM.
-- 🔹 Development and Collaboration Tools:
- •   GitHub – For version control and team collaboration.
- •   trello – For project management and task tracking.
- •   postman – For testing our Restful API.
+- 🔹 **For Frontend:**
+  - HTML, CSS, and JavaScript.
+- 🔹 **For Backend:**
+  - Python (Django Framework).
+  - RESTful API.
+- 🔹 **For Database and Storage:**
+  - PostgreSQL and ORM.
+- 🔹 **Development and Collaboration Tools:**
+  - GitHub – For version control and team collaboration.
+  - Trello – For project management and task tracking.
+  - Postman – For testing our RESTful API.
+
+## Image:
+
+![SmartLib](img.png)
+
+## Demo Video:
+
+🎥 [Watch the Demo](https://drive.google.com/file/d/1KMbr8_YAWa-eVOcinesvTErqP7CioEsr/view?usp=sharing)
+
