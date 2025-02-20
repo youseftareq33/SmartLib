@@ -27,6 +27,3 @@ Key Features:
  •   GitHub – For version control and team collaboration.
  •   trello – For project management and task tracking.
  •   postman – For testing our Restful API.
-
-## Demo Video:
-[![SmartLib Demo](https://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg)](https://github.com/youseftareq33/SmartLib/demo.mp4)
