@@ -64,6 +64,9 @@ def preferencesPage(request):
     categories = Category.objects.all()  
     return render(request, '4_3_preferences_page.html', {'Category': categories})
 
+def SimulationPage(request):
+    return render(request, '15_simulation_page.html')
+
 def findAccountPage(request):
     return render(request, '5_1_find_account_forgetPass_page.html')
 
@@ -139,7 +142,7 @@ class UserLoginView(APIView):
                     token = jwt.encode(payload, 'secret', algorithm='HS256')
 
                     # Get current date without time
-                    current_date = now().date()
+                    current_date = now()
                     last_login_date = user.last_login if user.last_login else None
 
                     isDailyLogin = False
@@ -177,8 +180,8 @@ class UserLoginView(APIView):
                         )
             
 
-                    # Update last_login timestamp
-                    user.last_login = now().date()
+                    #Update last_login timestamp
+                    user.last_login = now()
                     user.save(update_fields=['last_login'])  # Ensure last_login is updated
                     user.refresh_from_db()
 

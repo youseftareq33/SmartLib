@@ -145,7 +145,7 @@
                             <td data-field="reader_rank" 
                                 style="max-width: 100px; overflow-x: auto; white-space: nowrap;">
                                 <select class="rank-select" data-id="{{ reader.user.user_id }}">
-                                    <option value="ROCKY" {% if reader.reader_rank == "ROCKY" %}selected{% endif %}>ROCKY</option>
+                                    <option value="Rookie" {% if reader.reader_rank == "Rookie" %}selected{% endif %}>Rookie</option>
                                     <option value="Bronze" {% if reader.reader_rank == "Bronze" %}selected{% endif %}>Bronze</option>
                                     <option value="Silver" {% if reader.reader_rank == "Silver" %}selected{% endif %}>Silver</option>
                                     <option value="Gold" {% if reader.reader_rank == "Gold" %}selected{% endif %}>Gold</option>
@@ -221,7 +221,7 @@
         
                 <label for="readerRank">Reader Rank:</label>
                 <select id="readerRank" name="reader_rank">
-                    <option value="ROCKY" selected>ROCKY</option>
+                    <option value="Rookie" selected>Rookie</option>
                     <option value="Bronze">Bronze</option>
                     <option value="Silver">Silver</option>
                     <option value="Gold">Gold</option>

@@ -204,7 +204,6 @@ function deleteSelectedReaders() {
     console.log("Selected IDs:", selectedIds); // Log selected IDs
 
     if (selectedIds.length === 0) {
-        alert("Please select at least one user to delete.");
         return;
     }
 
@@ -229,15 +228,12 @@ function deleteSelectedReaders() {
         .then(results => {
             const errors = results.filter(result => result.status !== 'success');
             if (errors.length === 0) {
-                alert("All selected users have been deactivated successfully.");
                 window.location.reload();
             } else {
-                alert('Some updates failed: ' + errors.map(e => e.message).join(', '));
             }
         })
         .catch(error => {
             console.error("Error deactivating readers:", error);
-            alert("An error occurred while deactivating the readers.");
         });
 }
 
@@ -247,7 +243,6 @@ function deleteSelectedReaders() {
 function searchUser() {
     const searchInput = document.getElementById("searchInput").value.trim();
     if (searchInput === "") {
-        alert("Please enter a search term.");
         return;
     }
 
@@ -284,12 +279,10 @@ function searchUser() {
                     userTableBody.innerHTML = '<tr><td colspan="5">No users found.</td></tr>';
                 }
             } else {
-                alert("Error: " + data.message);
             }
         })
         .catch(error => {
             console.error("Error during search:", error);
-            alert("An error occurred while searching. Please try again.");
         });
 }
 
@@ -331,7 +324,6 @@ function enableEditableCells() {
                         const valueLower = newValue.toLowerCase();
                         formattedValue = (valueLower === 'active') ? true : false;
                         if (valueLower !== 'active' && valueLower !== 'inactive') {
-                            alert("Invalid input for is_active. Defaulting to 'Inactive'.");
                             formattedValue = false;
                         }
                     } else if (field === 'reader_point') {
@@ -344,16 +336,13 @@ function enableEditableCells() {
                     sendUpdateRequest(readerId, field, formattedValue)
                         .then(data => {
                             if (data.status === 'success') {
-                                alert('Update successful!');
                                 cell.blur(); // Blur to indicate update completed
                             } else {
-                                alert('Error: ' + data.message);
                                 window.location.reload(); // Reload on failure
                             }
                         })
                         .catch(error => {
                             console.error("Error updating cell:", error);
-                            alert("An error occurred while updating.");
                             window.location.reload();
                         });
                 } else {
@@ -427,15 +416,12 @@ function enableRankSelects() {
                 sendUpdateRequest(readerId, 'reader_rank', newValue)
                     .then(data => {
                         if (data.status === 'success') {
-                            alert('Rank updated successfully!');
                         } else {
-                            alert('Error: ' + data.message);
                             console.error('Server Error:', data.message);
                         }
                     })
                     .catch(error => {
                         console.error("Error updating rank:", error);
-                        alert("An error occurred while updating the rank.");
                     });
             } else {
                 console.log("Rank update canceled.");
@@ -484,13 +470,12 @@ document.addEventListener("DOMContentLoaded", function () {
             user_name: formData.get("user_name"),
             email: formData.get("email"),
             password: formData.get("password"),
-            reader_rank: formData.get("reader_rank") || "ROCKY", // Default rank
+            reader_rank: formData.get("reader_rank") || "Rookie", // Default rank
             reader_points: parseInt(formData.get("reader_points"), 10) || 0, // Default points
         };
 
         // Validate required fields
         if (!data.user_name || !data.email || !data.password) {
-            alert("Please fill out all required fields.");
             return;
         }
 
@@ -511,22 +496,16 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .then(data => {
                 if (data.status === "success") {
-                    // Show success message as an alert
-                    alert(data.message);
                     closeInsertForm();
                     window.location.reload();
                 } else {
-                    // Show error message as an alert
                     if (data.message === "Email already exists in the database.") {
-                        alert("⚠️ Error: This email is already registered. Please use a different email.");
                     } else {
-                        alert("⚠️ Error: " + data.message);
                     }
                 }
             })
             .catch(error => {
                 console.error("Error adding user:", error);
-                alert("An error occurred while adding the user. Email already exists .");
             });
     });
 });

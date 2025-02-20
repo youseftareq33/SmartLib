@@ -239,7 +239,6 @@ function fetchBooks(page = 1) {
     })
     .catch(error => {
         console.error('Error fetching books or categories:', error);
-        alert('Failed to load books. Please try again.');
     });
 }
 
@@ -344,14 +343,11 @@ function saveBookField(selectElement) {
         })
         .then((data) => {
             if (data.status === 'success') {
-                alert('Book field updated successfully!');
             } else {
-                alert('Error: ' + data.message);
             }
         })
         .catch((error) => {
             console.error('Error updating book field:', error);
-            alert('An error occurred while updating the book field.');
         });
 }
 
@@ -391,11 +387,9 @@ function updateBook(bookId, field, value) {
         })
         .then(data => {
             console.log('Book updated successfully:', data);
-            alert('Book updated successfully!');
         })
         .catch(error => {
             console.error('Error updating book:', error);
-            alert('An error occurred while updating the book.');
         });
 }
 document.addEventListener('DOMContentLoaded', () => {
@@ -461,7 +455,6 @@ function deleteSelectedBooks() {
 
     // Check if no books are selected
     if (selectedBookIds.length === 0) {
-        alert('No books selected for deletion.');
         return;
     }
 
@@ -498,9 +491,7 @@ function deleteSelectedBooks() {
 
             if (failedDeletions.length > 0) {
                 console.error('Failed deletions:', failedDeletions);
-                alert(`Some books could not be deleted: ${failedDeletions.join(', ')}.`);
             } else {
-                alert('Selected books deleted successfully!');
             }
 
             // Refresh the current page after deletion
@@ -508,7 +499,6 @@ function deleteSelectedBooks() {
         })
         .catch(error => {
             console.error('Error during deletion process:', error);
-            alert('An unexpected error occurred while deleting books. Please try again.');
         });
 }
 
@@ -582,9 +572,7 @@ function submitForm(event) {
         })
         .then(data => {
             if (data.status === "success") {
-                alert(data.message); 
             } else {
-                alert(`Error: ${data.message}`);
             }
         })
         .catch(error => console.error("Error submitting form:", error));
@@ -721,21 +709,17 @@ async function submitForm(event) {
         if (!response.ok) {
             const errorText = await response.text();
             console.error('Error response:', errorText);
-            alert(`Error: ${errorText}`);
             return;
         }
 
         const result = await response.json();
         if (result.status === 'success') {
-            alert(result.message);
             // Redirect to /adminpanel/books
             window.location.href = '/adminpanel/books';
         } else {
-            alert(`Error: ${result.message}`);
         }
     } catch (error) {
         console.error('Error occurred:', error);
-        alert('An unexpected error occurred. Please try again later.');
     }
 }
 

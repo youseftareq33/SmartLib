@@ -77,6 +77,7 @@ def delete_categories(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 #------------------------------------------#------------------------------------------#------------------------------------------
 
+@manager_login_required
 def feedback(request):
     # Fetch all feedback data
     feedbacks = FeedBack.objects.all().select_related('reader__user')
@@ -139,7 +140,7 @@ def add_user(request):
             password = data.get('password')
 
             is_active = False  # Set default value for is_active
-            reader_rank = data.get('reader_rank', 'ROCKY')
+            reader_rank = data.get('reader_rank', 'Rookie')
             reader_points = data.get('reader_points', 0)
 
             if not user_name or not email or not password:
@@ -187,7 +188,7 @@ def deactivate_reader(request, user_id):
 
         try:
             reader = Reader.objects.get(user=user)
-            reader.reader_rank = 'ROCKY'
+            reader.reader_rank = 'Rookie'
             reader.reader_point = 0
             reader.is_first_time = True
             reader.save()
@@ -236,7 +237,7 @@ def update_reader(request):
 
         # Handle reader-specific fields
         if field in ['reader_rank', 'reader_point', 'is_first_time']:
-            if field == 'reader_rank' and value not in ['ROCKY','Bronze', 'Silver', 'Gold']:
+            if field == 'reader_rank' and value not in ['Rookie','Bronze', 'Silver', 'Gold']:
                 return JsonResponse({'status': 'error', 'message': 'Invalid rank value'}, status=400)
 
             if field == 'reader_point':
@@ -433,6 +434,7 @@ def categories_data(request):
     return JsonResponse({'categories': list(categories)})
 
 # Render books.html page
+@manager_login_required
 def book_list(request):
     """
     View to render the HTML page for books.
@@ -587,7 +589,7 @@ def add_book(request):
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
-
+@manager_login_required
 def notificationspage(request):
     # Fetch all books with 'Pending' status, ordered by uploaded date
     pending_books = Book.objects.filter(status=Book.Status.PENDING).order_by('-book_uploaded_date')

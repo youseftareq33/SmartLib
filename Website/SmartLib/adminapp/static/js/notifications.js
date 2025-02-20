@@ -209,20 +209,22 @@ function updateBookStatus(bookId, status) {
             'X-CSRFToken': getCookie('csrftoken'),
         },
         body: JSON.stringify({ status }),
+        
     })
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
-            }
-        
+            } 
+
             return response.json();
+
         })
-        .then(data => {
-            location.reload();
-        })
+    
         .catch(error => {
             console.error('Error updating book status:', error);
         });
+
+        window.location.reload();
 }
 
 function openBook(bookId){

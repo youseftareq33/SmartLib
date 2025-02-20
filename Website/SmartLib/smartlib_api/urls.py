@@ -19,6 +19,7 @@ urlpatterns = [
     path('activate_change_password/<uidb64>/<token>/', activate_change_password.as_view(), name='activate_change_password'),
     path('resetPasswordPage/<str:email>/', resetPasswordPage, name='resetPasswordPage'),
     path('preferencesPage', preferencesPage, name='preferencesPage'), 
+    path('simulationPage', SimulationPage, name='simulationPage'), 
     path('save_preferences/', save_preferences, name='save_preferences'),
     path('user_preferences/<int:user_id>/', UserPreferencesView.as_view(), name='user_preferences'),
     path('update_isFirstTime', UpdateReaderIsFirstTime.as_view(), name='update_isFirstTime'), 

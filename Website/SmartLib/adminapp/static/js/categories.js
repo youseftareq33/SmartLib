@@ -213,7 +213,6 @@ function addCategory(event) {
     const newCategory = document.getElementById('newCategory').value.trim();
 
     if (!newCategory) {
-        alert("Please enter a valid category name.");
         return;
     }
 
@@ -228,17 +227,14 @@ function addCategory(event) {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            alert('Category added successfully!');
             window.location.reload(); 
         } else if (data.message === 'Category already exists.') {
             alert('This category already exists in the database.');
         } else {
-            alert('Error: ' + data.message);
         }
     })
     .catch(error => {
         console.error('Error adding category:', error);
-        alert('An error occurred while adding the category.');
     });
 }
 
@@ -251,7 +247,6 @@ function deleteSelectedCategories() {
         .filter(id => id); 
 
     if (categoryIds.length === 0) {
-        alert('Please select at least one category to delete.');
         return;
     }
 
@@ -272,14 +267,11 @@ function deleteSelectedCategories() {
                 const listItem = checkbox.closest('li');
                 listItem.remove();
             });
-            alert(data.message); 
         } else {
-            alert(data.message); 
         }
     })
     .catch(error => {
         console.error('Error deleting categories:', error);
-        alert('An error occurred while deleting the categories.');
     });
 }
 
