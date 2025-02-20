@@ -1,3 +1,0 @@
-remove git ignore: git add -f (ur folder)
-
-enter environment: environment\Scripts\activate.bat
