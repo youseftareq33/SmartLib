@@ -27,11 +27,10 @@ Key Features:
   - Trello – For project management and task tracking.
   - Postman – For testing our RESTful API.
 
+## Demo Video:
+
+🎥 <a href="https://drive.google.com/file/d/1KMbr8_YAWa-eVOcinesvTErqP7CioEsr/view?usp=sharing" target="_blank">Watch the Demo</a>
+
 ## Image:
 
 ![SmartLib](img.png)
-
-## Demo Video:
-
-🎥 [Watch the Demo](https://drive.google.com/file/d/1KMbr8_YAWa-eVOcinesvTErqP7CioEsr/view?usp=sharing)
-
