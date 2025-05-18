@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF.js Example</title>
+    <!-- Load pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.17.326/pdf.min.js"></script>
+</head>
+<body>
+    <canvas id="pdf-canvas"></canvas>
+    <script>
+        // Your custom script here
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.17.326/pdf.worker.min.js';
+
+        const url = 'image/34_file.pdf'; // Ensure the path is correct
+        let pdfDoc = null,
+            currentPage = 1,
+            totalPages = 0,
+            canvas = document.getElementById('pdf-canvas'),
+            ctx = canvas.getContext('2d');
+
+        pdfjsLib.getDocument(url).promise.then(pdf => {
+            pdfDoc = pdf;
+            totalPages = pdf.numPages;
+            renderPage(currentPage);
+        });
+
+        function renderPage(pageNum) {
+            pdfDoc.getPage(pageNum).then(page => {
+                const viewport = page.getViewport({ scale: 1.5 });
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                const renderContext = {
+                    canvasContext: ctx,
+                    viewport: viewport,
+                };
+                page.render(renderContext);
+            });
+        }
+    </script>
+</body>
+</html>

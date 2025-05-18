@@ -1,0 +1,2 @@
+1) add validation (required)
+2) password (show password icon dosent apper after hover to email feild)

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+        <link rel="stylesheet" href="style.css">
+        <link rel="icon" type="image/png" href="image/logo.png">
+        <title>View Book Page</title>
+    </head>
+
+    <body>
+
+        <!-- Header -->
+        <header>
+            <div class="left-header-container" id="left-header-container">
+
+                <a class="logo" id="logo" href='#'><img src='image/logo.png' width='60' height='60'></a>
+
+                <a class="Categories" id="Categories" href='#'>Categories</a>
+                <ul class="dropdown-categories" id="dropdown-categories">
+                    <li onclick="handleOptionClick('Sport')">Sport</li>
+                    <li onclick="handleOptionClick('History')">History</li>
+                    <li onclick="handleOptionClick('Science')">Science</li>
+                    <li onclick="handleOptionClick('Algo')">Algo</li>
+                    <li onclick="handleOptionClick('Algo1')">Algo1</li>
+                    <li onclick="handleOptionClick('Algo2')">Algo2</li>
+                </ul>
+
+                <div class="search">
+                    <i class="fa fa-search search-icon"></i>
+                    <input class="search-input" id="search-input" type="search" placeholder="Search for anything">
+                </div>
+
+            </div>
+
+            <div class="right-header-container" id="right-header-container">
+                
+                <a class="help" id="help" href='#'><img src='image/help.png' width='60' height='60'></a>
+                <a class="fav_list" id="fav_list" href='#'><img id="img_fav_list" src='image/fav_list.png' width='24' height='25'></a>
+                <div class="fav_list_dropdown" id="fav_list_dropdown">
+                    <h2>WishList</h2>
+                    <br>
+                    <p>Your wishlist is empty.</p>
+                </div>
+
+                <a class="notification" id="notification" href='#'><img id="img_notification" src='image/empty_notification.png' width='24' height='25'></a>
+                <div class="notification_dropdown" id="notification_dropdown">
+                    <h2>Notification</h2>
+                    <br>
+                    <p>No new notifications.</p>
+                </div>
+
+                <a class="user" id="user" href='#'><img id="img_user" src='image/user.png' width='27' height='25'></a>
+                <ul class="dropdown-user" id="dropdown-user">
+                    <li onclick="handleOptionClick_user('User Profile')">User Profile</li>
+                    <li onclick="handleOptionClick_user('My Uploaded Book')">My Uploaded Book</li>
+                    <li onclick="handleOptionClick_user('Wish List')">Wish List</li>
+                    <li onclick="handleOptionClick_user('Notification')">Notification</li>
+                    <li onclick="handleOptionClick_user('Send FeedBack')">Send FeedBack</li>
+                    <li onclick="handleOptionClick_user('Log out')">Log out</li>
+                </ul>
+
+                <div class="feedback-stack" id="feedback-stack">
+                    <div class="feedback-content">
+                        <span class="close-btn" id="closeBtn">&times;</span>
+                        <h2>Send Feedback</h2>
+                        <textarea id="feedbackText" placeholder="Write your feedback here..."></textarea>
+                        <button id="sendFeedback">Send</button>
+                    </div>
+                </div>
+
+            </div>
+
+        </header>
+
+        <!-- Main -->
+         <main>
+
+            <div class="left_container" id="left_container">
+
+                <!-- <img src='image/book1.png' width='352.3' height='490'> -->
+                <img src='image/book1.png' alt="Book Cover" class="book-cover">
+                <h3>BZU Story</h3>
+                <p>Author: Mosa Alnabulsi</p>
+                <p>Category: Sport</p>
+                <p>Rating: ⭐⭐⭐⭐</p>
+                <button>Open Book</button>
+
+            </div>
+
+            <div class="right_container" id="right_container">
+
+                <div class="book_description_container" id="book_description_container">
+                    <h2>Description</h2>
+                    <p>
+                        ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+                        ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+                        ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+                        ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+                        ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+                        ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+                        ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+                        ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+                        ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+                        ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+                        ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+                        ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+                        ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+                        ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+                        ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+                        ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+
+                    </p>
+
+                </div>
+
+                <hr id="divider_top" class="divider_top">
+
+                <div class="book_ratingAndReview_container" id="book_ratingAndReview_container">
+                    <h2>Rating and Review</h2>
+
+                    <div class="new_user_rate_container" id="new_user_rate_container">
+                        <h3>Leave a Review</h3>
+                        <div class="rating">
+                            <span class="star" data-rating="1">&#9733;</span>
+                            <span class="star" data-rating="2">&#9733;</span>
+                            <span class="star" data-rating="3">&#9733;</span>
+                            <span class="star" data-rating="4">&#9733;</span>
+                            <span class="star" data-rating="5">&#9733;</span>
+                            <div class="star_count" id="star_count">
+                                <p class="star_num" id="star_num"></p>
+                            </div>
+                        </div>
+                        <textarea class="review_input" placeholder="Write your review..."></textarea>
+                        <button class="submit_review_btn">Submit</button>
+                    </div>
+
+                    <div class="users_rate_list_container" id="users_rate_list_container">
+                        <div class="user_rate_container" id="user_rate_container">
+                            <div class="user_rate_container_top" id="user_rate_container_top">
+                                <h4>Mahmmoud Duhidi</h4>
+                                <p>⭐⭐⭐⭐ 4 Stars</p>
+                            </div>
+                            
+                            <div id="divider_down" class="divider_down">
+                                <hr>
+                            </div>
+
+                            <div class="user_rate_container_bottom" id="user_rate_container_bottom">
+                                <p>
+                                    nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+                                    nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+                                    nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+                                    nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+                                    nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+                                    
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="user_rate_container" id="user_rate_container">
+                            <div class="user_rate_container_top" id="user_rate_container_top">
+                                <h4>Mahmmoud Duhidi</h4>
+                                <p>⭐⭐⭐⭐ 4 Stars</p>
+                            </div>
+                            
+                            <div id="divider_down" class="divider_down">
+                                <hr>
+                            </div>
+
+                            <div class="user_rate_container_bottom" id="user_rate_container_bottom">
+                                <p>
+                                    nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+                                    nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+                                    nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+                                    nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="user_rate_container" id="user_rate_container">
+                            <div class="user_rate_container_top" id="user_rate_container_top">
+                                <h4>Mahmmoud Duhidi</h4>
+                                <p>⭐⭐⭐⭐ 4 Stars</p>
+                            </div>
+                            
+                            <div id="divider_down" class="divider_down">
+                                <hr>
+                            </div>
+
+                            <div class="user_rate_container_bottom" id="user_rate_container_bottom">
+                                <p>
+                                    nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+                                    nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+                                    nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+                                    nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button>Show all reviews</button>
+                </div>
+
+            </div>
+            
+         </main>
+
+        <!-- Script -->
+        <script src="script.js"></script>
+    </body>
+    <br>
+    <br>
+    <!-- Footer -->
+    <footer>
+        <h3>Discover, Learn & Read Your Favorite Books</h3>
+        <div class="right">
+            <div class="links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">About Us</a>
+                <a href="#">Contact Us</a>
+            </div>
+            <div class="social">
+                <i class='bx bxl-instagram'></i>
+                <i class='bx bxl-facebook-square'></i>
+                <i class='bx bxl-twitter'></i>
+            </div>
+            <p>copyright &copy; 2025 SmartLib. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+
+</html>

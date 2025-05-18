@@ -1,0 +1,4 @@
+yellow: #FFD700
+blue: #50A9E0
+
+grey: #2d2f31
