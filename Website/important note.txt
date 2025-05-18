@@ -1,3 +1,13 @@
 remove git ignore: git add -f (ur folder)
 
 enter environment: environment\Scripts\activate.bat
+
+to install library:
+
+create environment,
+
+python -m venv environment
+
+then,
+
+pip install -r requirements.txt
